@@ -1,16 +1,26 @@
 {
   "name": "saku-gwej-backend",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0",
+  "description": "Backend for SakuGwej",
+  "main": "index.js",
   "scripts": {
-    "start": "node app.js"
+    "build": "npx tsc",
+    "dev": "nodemon -e ts -w ./src src/server.ts"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.informatika.org/if3250_2023_k01_05_sakugwej/if3250_2023_k01_05_sakugwej_backend.git"
+  },
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.20.1",
-    "cookie-parser": "~1.4.4",
-    "cors": "^2.8.5",
-    "debug": "~2.6.9",
-    "express": "~4.16.1",
-    "http-errors": "~1.6.3"
+    "express": "^4.18.2",
+    "typescript": "^4.9.5"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^18.13.0",
+    "nodemon": "^2.0.20",
+    "ts-node": "^10.9.1"
   }
 }
