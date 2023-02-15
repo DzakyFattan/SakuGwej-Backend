@@ -1,11 +1,11 @@
 version: "3.8"
 services:
-  backend:
+  sakugwej-backend:
     build:
       context: .
       dockerfile: Dockerfile
-    image: saku-jwej-backend:latest
-    container_name: saku-gwej-backend
+    image: sakugwej-backend:latest
+    container_name: sakugwej-backend
     volumes:
       - ./:/usr/src/app
       - /usr/src/app/node_modules
