@@ -3,12 +3,15 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const connString = process.env.ATLAS_URI || '';
+const connString = process.env.MONGO_URL || '';
 
 const client = new MongoClient(connString);
 
-let conn = await client.connect();
+async function connect() {
+    await client.connect();
+    return client;
+}
 
-let db = conn.db('test');
+let conn = connect();
 
-export default db;
+export default conn;
