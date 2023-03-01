@@ -1,0 +1,46 @@
+stages:          
+  - build
+  - test
+  - deploy  
+
+build-locally:
+    stage: build
+    image: "node:19-alpine"
+    script:
+        - npm i
+        - set -e
+        - npm run dev > >(tee -a output.log) 2>&1 &
+        - sleep 5
+        - kill -INT $! || true
+        - echo "Stopping the program if necessary"
+        - if grep -q "error" output.log; then exit 1; fi
+
+lint-test-job:   
+  stage: test    
+  image: "node:19-alpine"
+  script:
+    - npm i
+    - npm i prettier
+    - echo "Linting code..."
+    - npx prettier --check "src/**/*.ts"
+
+unit-test-job:   
+  stage: test    
+  image: "node:19-alpine"
+  script:
+    - npm i
+    - npm i mocha
+    # - npm test 				# Tests later when there is actually something to test
+    - sleep 3
+    - echo "Guess it works"
+  
+deploy-dev-job:
+  stage: deploy
+  script: 
+    - docker stop ppl-backend-dev || true
+    - docker rm ppl-backend-dev || true
+    - cp $DOT_ENV_DEV .env
+    - docker build -f Dockerfile.ci -t ppl-backend-dev-img .
+    - docker run -d -p 3001:3001 --name ppl-backend-dev ppl-backend-dev-img
+  only: 
+    - development
