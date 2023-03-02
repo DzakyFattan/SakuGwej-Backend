@@ -41,7 +41,7 @@ const register = async (req: Request, res: Response) => {
 const login = async (req: Request, res: Response) => {
   // res.send("Hello, you are in the login route");
   if (!req.body) {
-    res.status(400).send("Please provide a username and password");
+    res.status(400).send("Bad Response");
     return;
   }
   const { username, password } = req.body;
@@ -64,7 +64,7 @@ const login = async (req: Request, res: Response) => {
     ).toString(crypto.enc.Utf8);
     if (decryptedPass != password) {
       // console.log(decryptedPass, password);
-      res.status(400).send("Incorrect password");
+      res.status(403).send("Incorrect password");
       return;
     }
     res.send(result);
