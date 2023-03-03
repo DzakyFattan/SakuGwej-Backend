@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import db from "./db";
 import crypto from "crypto-js";
 import dotenv from "dotenv";
+import { ObjectId } from "mongodb";
 
 dotenv.config();
 
@@ -74,4 +75,152 @@ const login = async (req: Request, res: Response) => {
   }
 };
 
-export { register, login };
+const changeProfile = async (req: Request, res: Response) => {
+  if (!req.body) {
+    res.status(400).send({
+      error_message: "Bad Response",
+    });
+    return;
+  }
+
+  // TODO: Change oldUsername to JWT or something along those lines to verify user
+  const {
+    oldUsername,
+    newUsername,
+    newPassword,
+    newGender,
+    newBirthDate,
+    newEmail,
+    newPhoneNumber,
+  } = req.body;
+
+  if (oldUsername == undefined || oldUsername == "") {
+    res.status(400).send({
+      error_message: "Bad Response",
+    });
+    return;
+  }
+
+  // check if user exists
+  const collection = (await db).db("sakugwej").collection("users");
+  let query = { username: oldUsername };
+  let result = await collection.findOne(query);
+  if (!result) {
+    res.status(400).send({
+      error_message: "User not found",
+    });
+    return;
+  }
+
+  // prepare the user filter query and the update query
+  let filter = { _id: new ObjectId(result._id) };
+  let updates: Record<any, any> = {};
+
+  // prepare to update username
+  if (newUsername != undefined && newUsername != "") {
+    // check if newUsername is taken
+    query = { username: newUsername };
+    result = await collection.findOne(query);
+    if (result) {
+      res.status(400).send({
+        error_message: "Username taken",
+      });
+      return;
+    }
+
+    // add the newUsername to the update list
+    updates.username = newUsername;
+  }
+
+  if (newPassword != undefined && newPassword != "") {
+    try {
+      const encryptedPass = crypto.AES.encrypt(
+        newPassword,
+        process.env.PASS_SECRET!
+      ).toString();
+      updates.password = encryptedPass;
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({
+        error_message: "Internal server error",
+      });
+    }
+  }
+
+  if (newGender != undefined && newGender != "") {
+    let genders = ["Perempuan", "Laki-Laki", "Lainnya", "Roti Tawar"];
+    if (!genders.includes(newGender)) {
+      res.status(400).send({
+        error_message: "Invalid gender",
+      });
+      return;
+    }
+
+    updates.gender = newGender;
+  }
+
+  if (newBirthDate != undefined && newBirthDate != "") {
+    let dateRegex = new RegExp("[\\d]{4}-[\\d]{2}-[\\d]{2}");
+    if (!dateRegex.test(newBirthDate)) {
+      res.status(400).send({
+        error_message: "Invalid birth date",
+      });
+      return;
+    }
+    updates.birthDate = new Date(newBirthDate);
+  }
+
+  if (newEmail != undefined && newEmail != "") {
+    let emailRegex = new RegExp("[\\w\\d]*@[\\w\\d]+(\\.[\\w\\d]+)+");
+    if (!emailRegex.test(newEmail)) {
+      res.status(400).send({
+        error_message: "Invalid email",
+        err_on: "newEmail",
+      });
+      return;
+    }
+    // check if email is taken
+    let query_email = { email: newEmail };
+    result = await collection.findOne(query_email);
+    if (result) {
+      res.status(400).send({
+        error_message: "Email taken",
+      });
+      return;
+    }
+
+    updates.email = newEmail;
+  }
+
+  if (newPhoneNumber != undefined && newPhoneNumber != "") {
+    let phoneRegex = new RegExp("[\\d]{10,13}");
+    if (!phoneRegex.test(newPhoneNumber)) {
+      res.status(400).send({
+        error_message: "Invalid phone number",
+      });
+      return;
+    }
+    updates.phoneNumber = newPhoneNumber;
+  }
+
+  let updateDocument = {
+    $set: updates,
+  };
+
+  try {
+    const upd_result = await collection.updateOne(filter, updateDocument);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      error_message: "Internal server error",
+    });
+    return;
+  }
+
+  res.status(200).send({
+    success_message: "Profile updated",
+  });
+  return;
+};
+
+export { register, login, changeProfile };
