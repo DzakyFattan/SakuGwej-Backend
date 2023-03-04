@@ -1,7 +1,25 @@
 ## API Documentations
+### POST: /api/v1/user/register
+#### Required (as JSON payload):
+- username
+- email
+- password
+
+#### Response:
+- 201 OK 
+- 4XX with JSON Payload:
+```json
+{
+    "message": "{Error message}"
+}
+```
+
+### POST: /api/v1/user/login
+
+
 ### POST:  /api/v1/user/change-profile
 #### Required:
-- jwt (as bearer token)
+- JWT (as bearer token)
 
 #### Optional (as JSON payload):
 - newUsername

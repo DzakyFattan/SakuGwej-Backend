@@ -6,69 +6,95 @@ import { ObjectId } from "mongodb";
 import { jwt } from "../utils/jwt";
 import { AuthenticatedRequest } from "../types/AuthenticatedRequest";
 import { getUpdatedvalues } from "../services/profile/updatedValues";
+import { HttpStatusCode } from "../types/HttpStatusCode";
+import {
+  emailExisted,
+  usernameExisted,
+} from "../services/auth/checkDuplicates";
 
 dotenv.config();
 
 const register = async (req: Request, res: Response) => {
   if (!req.body) {
-    res.status(400).send("Please provide a username and password");
-    return;
-  }
-  const { username, password } = req.body;
-  if (!username || !password) {
-    res.status(400).send("Please provide a username and password");
-    return;
-  }
-  const collection = (await db).db("sakugwej").collection("users");
-  let query = { username: username };
-  let result = await collection.findOne(query);
-  if (result) {
-    res.status(400).send("User already exists");
-    return;
-  }
-  try {
-    const encryptedPass = crypto.AES.encrypt(
-      password,
-      process.env.PASS_SECRET!
-    ).toString();
-    const insert = await collection.insertOne({
-      username,
-      password: encryptedPass,
+    res.status(400).send({
+      message: "Bad Payload",
     });
-    res.send(insert).status(204);
+    return;
+  }
+  const { username, email, password } = req.body;
+  if (!username || !email || !password) {
+    res.status(400).send({
+      message: "Please provide a username, email and password",
+    });
+    return;
+  }
+  if (await emailExisted(email)) {
+    res.status(400).send({
+      message: "Email already exists",
+    });
+    return;
+  }
+  if (await usernameExisted(username)) {
+    res.status(400).send({
+      message: "Username already exists",
+    });
+    return;
+  }
+
+  const collection = (await db).db("sakugwej").collection("users");
+  try {
+    const salt = crypto.lib.WordArray.random(64).toString();
+    const hashedPass = crypto
+      .SHA256(salt + password + process.env.PASS_SECRET!)
+      .toString();
+    collection.insertOne({
+      username: username,
+      email: email,
+      password: hashedPass,
+      salt: salt,
+    });
+    res.status(HttpStatusCode.CREATED).send();
   } catch (err) {
     console.log(err);
-    res.status(500).send("Internal server error");
+    res.status(500).send({
+      message: "Internal server error",
+    });
   }
 };
 
 const login = async (req: Request, res: Response) => {
   // res.send("Hello, you are in the login route");
   if (!req.body) {
-    res.status(400).send("Bad Response");
+    res.status(400).send({
+      message: "Bad Payload",
+    });
     return;
   }
-  const { username, password } = req.body;
-  if (!username || !password) {
-    res.status(400).send("Please provide a username and password");
+  const { email, password } = req.body;
+  if (!email || !password) {
+    res.status(400).send({
+      message: "Please provide an email and password",
+    });
     return;
   }
   // search for username and pass
   const collection = (await db).db("sakugwej").collection("users");
-  let query = { username: username };
+  let query = { email: email };
   let result = await collection.findOne(query);
   if (!result) {
-    res.status(404).send("User not found");
+    res.status(404).send({
+      message: "User not found",
+    });
     return;
   }
   try {
-    const decryptedPass = crypto.AES.decrypt(
-      result.password,
-      process.env.PASS_SECRET!
-    ).toString(crypto.enc.Utf8);
-    if (decryptedPass != password) {
-      // console.log(decryptedPass, password);
-      res.status(403).send("Incorrect password");
+    const hashedPass = crypto
+      .SHA256(result.salt + password + process.env.PASS_SECRET!)
+      .toString();
+    if (hashedPass != result.password) {
+      res.status(403).send({
+        message: "Incorrect password",
+      });
       return;
     }
     let token = jwt.sign(
