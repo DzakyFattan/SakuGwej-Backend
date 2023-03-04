@@ -1,12 +1,51 @@
 ## API Documentations
-### /user/change-profile
+### POST:  /api/v1/user/change-profile
 #### Required:
-- oldUsername (will change to JWT later or other auth method if implemented)
+- jwt (as bearer token)
 
-#### Optional:
+#### Optional (as JSON payload):
 - newUsername
 - newPassword
 - newGender ('Perempuan', 'Laki-Laki', 'Lainnya', 'Roti Tawar')
 - newBirthDate ('YYYY-MM-DD')
 - newEmail 
 - newPhoneNumber
+
+#### Response:
+- 200 OK with JSON payload:
+```json
+{
+    "message": "Profile updated successfully"
+}
+```
+- 4XX with JSON Payload:
+```json
+{
+    "message": "{Error message}"
+}
+```
+
+### GET: /api/v1/user/profile
+#### Required:
+- jwt (as bearer token)
+
+#### Response:
+- 200 OK with JSON Payload:
+```json
+{
+    "message": "success",
+    "data": {
+        "username": "{username}",
+        "birthDate": "{birthDate}",
+        "email": "{email}",
+        "gender": "{gender}",
+        "phoneNumber": "{phoneNumber}"
+    }
+}
+```
+- 4xx with JSON Payload:
+```json
+{
+    "message": "{Error message}"
+}
+```

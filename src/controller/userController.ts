@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
-import db from "./db";
+import db from "../utils/db";
 import crypto from "crypto-js";
 import dotenv from "dotenv";
 import { ObjectId } from "mongodb";
-var jwt = require("jsonwebtoken");
+import { jwt } from "../utils/jwt";
+import { AuthenticatedRequest } from "../types/AuthenticatedRequest";
+import { getUpdatedvalues } from "../services/profile/updatedValues";
 
 dotenv.config();
 
@@ -86,10 +88,7 @@ const login = async (req: Request, res: Response) => {
   }
 };
 
-const changeProfile = async (
-  req: Request & { token?: string; token_data?: Record<any, any> },
-  res: Response
-) => {
+const changeProfile = async (req: AuthenticatedRequest, res: Response) => {
   if (!req.body) {
     res.status(400).send({
       message: "Bad Response",
@@ -97,20 +96,9 @@ const changeProfile = async (
     return;
   }
 
-  // TODO: Change oldUsername to JWT or something along those lines to verify user
-  const {
-    newUsername,
-    newPassword,
-    newGender,
-    newBirthDate,
-    newEmail,
-    newPhoneNumber,
-  } = req.body;
-
-  let oldUsername = req.token_data?.username;
-
   // check if user exists
   const collection = (await db).db("sakugwej").collection("users");
+  let oldUsername = req.token_data?.username;
   let query = { username: oldUsername };
   let result = await collection.findOne(query);
   if (!result) {
@@ -122,100 +110,16 @@ const changeProfile = async (
 
   // prepare the user filter query and the update query
   let filter = { _id: new ObjectId(result._id) };
-  let updates: Record<any, any> = {};
+  let updates = await getUpdatedvalues(req, res);
 
-  // prepare to update username
-  if (newUsername != undefined && newUsername != "") {
-    // check if newUsername is taken
-    query = { username: newUsername };
-    result = await collection.findOne(query);
-    if (result) {
-      res.status(400).send({
-        message: "Username taken",
-      });
-      return;
-    }
-
-    // add the newUsername to the update list
-    updates.username = newUsername;
+  if (!updates.success) {
+    return;
   }
-
-  if (newPassword != undefined && newPassword != "") {
-    try {
-      const encryptedPass = crypto.AES.encrypt(
-        newPassword,
-        process.env.PASS_SECRET!
-      ).toString();
-      updates.password = encryptedPass;
-    } catch (err) {
-      console.log(err);
-      res.status(500).send({
-        message: "Internal server error",
-      });
-    }
-  }
-
-  if (newGender != undefined && newGender != "") {
-    let genders = ["Perempuan", "Laki-Laki", "Lainnya", "Roti Tawar"];
-    if (!genders.includes(newGender)) {
-      res.status(400).send({
-        message: "Invalid gender",
-      });
-      return;
-    }
-
-    updates.gender = newGender;
-  }
-
-  if (newBirthDate != undefined && newBirthDate != "") {
-    let dateRegex = new RegExp("[\\d]{4}-[\\d]{2}-[\\d]{2}");
-    if (!dateRegex.test(newBirthDate)) {
-      res.status(400).send({
-        message: "Invalid birth date",
-      });
-      return;
-    }
-    updates.birthDate = new Date(newBirthDate);
-  }
-
-  if (newEmail != undefined && newEmail != "") {
-    let emailRegex = new RegExp("[\\w\\d]*@[\\w\\d]+(\\.[\\w\\d]+)+");
-    if (!emailRegex.test(newEmail)) {
-      res.status(400).send({
-        message: "Invalid email",
-        err_on: "newEmail",
-      });
-      return;
-    }
-    // check if email is taken
-    let query_email = { email: newEmail };
-    result = await collection.findOne(query_email);
-    if (result) {
-      res.status(400).send({
-        message: "Email taken",
-      });
-      return;
-    }
-
-    updates.email = newEmail;
-  }
-
-  if (newPhoneNumber != undefined && newPhoneNumber != "") {
-    let phoneRegex = new RegExp("[\\d]{10,13}");
-    if (!phoneRegex.test(newPhoneNumber)) {
-      res.status(400).send({
-        message: "Invalid phone number",
-      });
-      return;
-    }
-    updates.phoneNumber = newPhoneNumber;
-  }
-
-  let updateDocument = {
-    $set: updates,
-  };
 
   try {
+    let updateDocument = {
+      $set: updates.data,
+    };
     const upd_result = await collection.updateOne(filter, updateDocument);
   } catch (err) {
     console.log(err);
@@ -226,7 +130,7 @@ const changeProfile = async (
   }
 
   res.status(200).send({
-    success_message: "Profile updated",
+    message: "Profile updated",
   });
   return;
 };
@@ -244,8 +148,8 @@ const getProfile = async (
     });
   }
   res.status(200).send({
-    message: "sucess",
-    data: { ...result, _id: undefined },
+    message: "success",
+    data: { ...result, _id: undefined, password: undefined },
   });
   return;
 };
