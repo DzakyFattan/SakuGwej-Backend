@@ -3,7 +3,7 @@ import db from "./db";
 import crypto from "crypto-js";
 import dotenv from "dotenv";
 import { ObjectId } from "mongodb";
-var jwt = require('jsonwebtoken');
+var jwt = require("jsonwebtoken");
 
 dotenv.config();
 
@@ -70,15 +70,15 @@ const login = async (req: Request, res: Response) => {
       return;
     }
     let token = jwt.sign(
-      { 
-        username: result.username 
-      }, 
-      process.env.JWT_SECRET!, 
-      { expiresIn: '7d' }
+      {
+        username: result.username,
+      },
+      process.env.JWT_SECRET!,
+      { expiresIn: "7d" }
     );
     res.send({
       message: "Login successful",
-      token: token
+      token: token,
     });
   } catch (err) {
     console.log(err);
@@ -86,7 +86,10 @@ const login = async (req: Request, res: Response) => {
   }
 };
 
-const changeProfile = async (req: Request & { token?: string, token_data?: Record<any, any> }, res: Response) => {
+const changeProfile = async (
+  req: Request & { token?: string; token_data?: Record<any, any> },
+  res: Response
+) => {
   if (!req.body) {
     res.status(400).send({
       message: "Bad Response",
@@ -228,20 +231,23 @@ const changeProfile = async (req: Request & { token?: string, token_data?: Recor
   return;
 };
 
-const getProfile = async (req: Request & { token?: string, token_data?: Record<any, any> }, res: Response) => {
-    const collection = (await db).db("sakugwej").collection("users");
-    let query = { username: req.token_data?.username };
-    let result = await collection.findOne(query);
-    if (!result) {
-        res.status(400).send({
-            message: "User not found",
-        });
-      }
-    res.status(200).send({
-      message: "sucess",
-      data: { ...result, _id: undefined },
+const getProfile = async (
+  req: Request & { token?: string; token_data?: Record<any, any> },
+  res: Response
+) => {
+  const collection = (await db).db("sakugwej").collection("users");
+  let query = { username: req.token_data?.username };
+  let result = await collection.findOne(query);
+  if (!result) {
+    res.status(400).send({
+      message: "User not found",
     });
-    return;
-}
+  }
+  res.status(200).send({
+    message: "sucess",
+    data: { ...result, _id: undefined },
+  });
+  return;
+};
 
 export { register, login, changeProfile, getProfile };
