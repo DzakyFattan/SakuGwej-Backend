@@ -3,6 +3,7 @@ import db from "./db";
 import crypto from "crypto-js";
 import dotenv from "dotenv";
 import { ObjectId } from "mongodb";
+var jwt = require('jsonwebtoken');
 
 dotenv.config();
 
@@ -68,24 +69,33 @@ const login = async (req: Request, res: Response) => {
       res.status(403).send("Incorrect password");
       return;
     }
-    res.send(result);
+    let token = jwt.sign(
+      { 
+        username: result.username 
+      }, 
+      process.env.JWT_SECRET!, 
+      { expiresIn: '7d' }
+    );
+    res.send({
+      message: "Login successful",
+      token: token
+    });
   } catch (err) {
     console.log(err);
     res.status(500).send("Internal server error");
   }
 };
 
-const changeProfile = async (req: Request, res: Response) => {
+const changeProfile = async (req: Request & { token?: string, token_data?: Record<any, any> }, res: Response) => {
   if (!req.body) {
     res.status(400).send({
-      error_message: "Bad Response",
+      message: "Bad Response",
     });
     return;
   }
 
   // TODO: Change oldUsername to JWT or something along those lines to verify user
   const {
-    oldUsername,
     newUsername,
     newPassword,
     newGender,
@@ -94,12 +104,7 @@ const changeProfile = async (req: Request, res: Response) => {
     newPhoneNumber,
   } = req.body;
 
-  if (oldUsername == undefined || oldUsername == "") {
-    res.status(400).send({
-      error_message: "Bad Response",
-    });
-    return;
-  }
+  let oldUsername = req.token_data?.username;
 
   // check if user exists
   const collection = (await db).db("sakugwej").collection("users");
@@ -107,7 +112,7 @@ const changeProfile = async (req: Request, res: Response) => {
   let result = await collection.findOne(query);
   if (!result) {
     res.status(400).send({
-      error_message: "User not found",
+      message: "User not found",
     });
     return;
   }
@@ -123,7 +128,7 @@ const changeProfile = async (req: Request, res: Response) => {
     result = await collection.findOne(query);
     if (result) {
       res.status(400).send({
-        error_message: "Username taken",
+        message: "Username taken",
       });
       return;
     }
@@ -142,7 +147,7 @@ const changeProfile = async (req: Request, res: Response) => {
     } catch (err) {
       console.log(err);
       res.status(500).send({
-        error_message: "Internal server error",
+        message: "Internal server error",
       });
     }
   }
@@ -151,7 +156,7 @@ const changeProfile = async (req: Request, res: Response) => {
     let genders = ["Perempuan", "Laki-Laki", "Lainnya", "Roti Tawar"];
     if (!genders.includes(newGender)) {
       res.status(400).send({
-        error_message: "Invalid gender",
+        message: "Invalid gender",
       });
       return;
     }
@@ -163,7 +168,7 @@ const changeProfile = async (req: Request, res: Response) => {
     let dateRegex = new RegExp("[\\d]{4}-[\\d]{2}-[\\d]{2}");
     if (!dateRegex.test(newBirthDate)) {
       res.status(400).send({
-        error_message: "Invalid birth date",
+        message: "Invalid birth date",
       });
       return;
     }
@@ -174,7 +179,7 @@ const changeProfile = async (req: Request, res: Response) => {
     let emailRegex = new RegExp("[\\w\\d]*@[\\w\\d]+(\\.[\\w\\d]+)+");
     if (!emailRegex.test(newEmail)) {
       res.status(400).send({
-        error_message: "Invalid email",
+        message: "Invalid email",
         err_on: "newEmail",
       });
       return;
@@ -184,7 +189,7 @@ const changeProfile = async (req: Request, res: Response) => {
     result = await collection.findOne(query_email);
     if (result) {
       res.status(400).send({
-        error_message: "Email taken",
+        message: "Email taken",
       });
       return;
     }
@@ -196,7 +201,7 @@ const changeProfile = async (req: Request, res: Response) => {
     let phoneRegex = new RegExp("[\\d]{10,13}");
     if (!phoneRegex.test(newPhoneNumber)) {
       res.status(400).send({
-        error_message: "Invalid phone number",
+        message: "Invalid phone number",
       });
       return;
     }
@@ -212,7 +217,7 @@ const changeProfile = async (req: Request, res: Response) => {
   } catch (err) {
     console.log(err);
     res.status(500).send({
-      error_message: "Internal server error",
+      message: "Internal server error",
     });
     return;
   }
@@ -223,4 +228,20 @@ const changeProfile = async (req: Request, res: Response) => {
   return;
 };
 
-export { register, login, changeProfile };
+const getProfile = async (req: Request & { token?: string, token_data?: Record<any, any> }, res: Response) => {
+    const collection = (await db).db("sakugwej").collection("users");
+    let query = { username: req.token_data?.username };
+    let result = await collection.findOne(query);
+    if (!result) {
+        res.status(400).send({
+            message: "User not found",
+        });
+      }
+    res.status(200).send({
+      message: "sucess",
+      data: { ...result, _id: undefined },
+    });
+    return;
+}
+
+export { register, login, changeProfile, getProfile };
