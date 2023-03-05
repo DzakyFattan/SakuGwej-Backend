@@ -167,7 +167,9 @@ const getProfile = async (
 ) => {
   const collection = (await db).db("sakugwej").collection("users");
   let query = { username: req.token_data?.username };
+  console.log(query);
   let result = await collection.findOne(query);
+  console.log(result);
   if (!result) {
     res.status(400).send({
       message: "User not found",
@@ -177,6 +179,7 @@ const getProfile = async (
     message: "success",
     data: { ...result, _id: undefined, password: undefined },
   });
+  console.log("ended here");
   return;
 };
 
