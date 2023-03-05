@@ -36,11 +36,12 @@ async function getUpdatedvalues(req: AuthenticatedRequest, res: Response) {
 
   if (newPassword != undefined && newPassword != "") {
     try {
-      const encryptedPass = crypto.AES.encrypt(
-        newPassword,
-        process.env.PASS_SECRET!
-      ).toString();
-      updates.password = encryptedPass;
+      const salt = crypto.lib.WordArray.random(64).toString();
+      const hashedPass = crypto
+        .SHA256(salt + newPassword + process.env.PASS_SECRET!)
+        .toString();
+      updates.salt = salt;
+      updates.password = hashedPass;
     } catch (err) {
       console.log(err);
       res.status(500).send({

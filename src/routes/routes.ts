@@ -13,16 +13,15 @@ import cors from "cors";
 const router = Router();
 router.use(cors());
 
-router.get("/", (req: Request, res: Response) => {
+router.get("/", (_req: Request, res: Response) => {
   res.send({
     message: "Unexpected route",
   });
 });
 
 router.get("/test", test);
-router.post("/register", jsonParser, register);
-
-router.post("/login", jsonParser, login);
+router.post("/user/register", jsonParser, register);
+router.post("/user/login", jsonParser, login);
 router.post("/user/change-profile", jsonParser, verifyToken, changeProfile);
 router.get("/user/profile", verifyToken, getProfile);
 
