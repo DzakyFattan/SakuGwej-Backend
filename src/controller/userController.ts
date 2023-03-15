@@ -7,10 +7,7 @@ import { jwt } from "../utils/jwt";
 import { AuthenticatedRequest } from "../types/AuthenticatedRequest";
 import { getUpdatedvalues } from "../services/profile/updatedValues";
 import { HttpStatusCode } from "../types/HttpStatusCode";
-import {
-  emailExisted,
-  usernameExisted,
-} from "../services/auth/checkDuplicates";
+import { emailExisted, usernameExisted } from "../services/auth/checkDuplicates";
 
 dotenv.config();
 
@@ -44,9 +41,7 @@ const register = async (req: Request, res: Response) => {
   const collection = (await db).db("sakugwej").collection("users");
   try {
     const salt = crypto.lib.WordArray.random(64).toString();
-    const hashedPass = crypto
-      .SHA256(salt + password + process.env.PASS_SECRET!)
-      .toString();
+    const hashedPass = crypto.SHA256(salt + password + process.env.PASS_SECRET!).toString();
     collection.insertOne({
       username: username,
       email: email,
@@ -88,9 +83,7 @@ const login = async (req: Request, res: Response) => {
     return;
   }
   try {
-    const hashedPass = crypto
-      .SHA256(result.salt + password + process.env.PASS_SECRET!)
-      .toString();
+    const hashedPass = crypto.SHA256(result.salt + password + process.env.PASS_SECRET!).toString();
     if (hashedPass != result.password) {
       res.status(403).send({
         message: "Incorrect password",
@@ -99,7 +92,7 @@ const login = async (req: Request, res: Response) => {
     }
     let token = jwt.sign(
       {
-        username: result.username,
+        _id: result._id,
       },
       process.env.JWT_SECRET!,
       { expiresIn: "7d" }
@@ -124,8 +117,9 @@ const changeProfile = async (req: AuthenticatedRequest, res: Response) => {
 
   // check if user exists
   const collection = (await db).db("sakugwej").collection("users");
-  let oldUsername = req.token_data?.username;
-  let query = { username: oldUsername };
+  let query = { _id: new ObjectId(req.token_data?._id) };
+  // let oldUsername = req.token_data?.username;
+  // let query = { username: oldUsername };
   let result = await collection.findOne(query);
   if (!result) {
     res.status(400).send({
@@ -165,19 +159,27 @@ const getProfile = async (
   req: Request & { token?: string; token_data?: Record<any, any> },
   res: Response
 ) => {
-  const collection = (await db).db("sakugwej").collection("users");
-  let query = { username: req.token_data?.username };
-  let result = await collection.findOne(query);
-  if (!result) {
-    res.status(400).send({
-      message: "User not found",
+  try {
+    const collection = (await db).db("sakugwej").collection("users");
+    let query = { _id: new ObjectId(req.token_data?._id) };
+    let result = await collection.findOne(query);
+    if (!result) {
+      res.status(400).send({
+        message: "User not found",
+      });
+    }
+    res.status(200).send({
+      message: "success",
+      data: { ...result, _id: undefined, password: undefined },
     });
+    return;
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      message: "Internal server error",
+    });
+    return;
   }
-  res.status(200).send({
-    message: "success",
-    data: { ...result, _id: undefined, password: undefined },
-  });
-  return;
 };
 
 export { register, login, changeProfile, getProfile };
