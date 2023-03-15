@@ -65,24 +65,24 @@ const login = async (req: Request, res: Response) => {
     });
     return;
   }
-  const { email, password } = req.body;
-  if (!email || !password) {
-    res.status(400).send({
-      message: "Please provide an email and password",
-    });
-    return;
-  }
-  // search for username and pass
-  const collection = (await db).db("sakugwej").collection("users");
-  let query = { email: email };
-  let result = await collection.findOne(query);
-  if (!result) {
-    res.status(404).send({
-      message: "User not found",
-    });
-    return;
-  }
   try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      res.status(400).send({
+        message: "Please provide an email and password",
+      });
+      return;
+    }
+    // search for username and pass
+    const collection = (await db).db("sakugwej").collection("users");
+    let query = { email: email };
+    let result = await collection.findOne(query);
+    if (!result) {
+      res.status(404).send({
+        message: "User not found",
+      });
+      return;
+    }
     const hashedPass = crypto.SHA256(result.salt + password + process.env.PASS_SECRET!).toString();
     if (hashedPass != result.password) {
       res.status(403).send({
@@ -114,29 +114,27 @@ const changeProfile = async (req: AuthenticatedRequest, res: Response) => {
     });
     return;
   }
-
-  // check if user exists
-  const collection = (await db).db("sakugwej").collection("users");
-  let query = { _id: new ObjectId(req.token_data?._id) };
-  // let oldUsername = req.token_data?.username;
-  // let query = { username: oldUsername };
-  let result = await collection.findOne(query);
-  if (!result) {
-    res.status(400).send({
-      message: "User not found",
-    });
-    return;
-  }
-
-  // prepare the user filter query and the update query
-  let filter = { _id: new ObjectId(result._id) };
-  let updates = await getUpdatedvalues(req, res);
-
-  if (!updates.success) {
-    return;
-  }
-
   try {
+    // check if user exists
+    const collection = (await db).db("sakugwej").collection("users");
+    let query = { _id: new ObjectId(req.token_data?._id) };
+    // let oldUsername = req.token_data?.username;
+    // let query = { username: oldUsername };
+    let result = await collection.findOne(query);
+    if (!result) {
+      res.status(400).send({
+        message: "User not found",
+      });
+      return;
+    }
+
+    // prepare the user filter query and the update query
+    let filter = { _id: new ObjectId(result._id) };
+    let updates = await getUpdatedvalues(req, res);
+
+    if (!updates.success) {
+      return;
+    }
     let updateDocument = {
       $set: updates.data,
     };
