@@ -5,7 +5,12 @@ import {
   changeProfile,
   getProfile,
 } from "../controller/userController";
-import { getAccounts, addAccount, updateAccount, deleteAccount } from "../controller/accountController";
+import {
+  getAccounts,
+  addAccount,
+  updateAccount,
+  deleteAccount,
+} from "../controller/accountController";
 import { test } from "../controller/mainController";
 import { jsonParser } from "../middleware/jsonParser";
 import { verifyToken } from "../middleware/verifyToken";

@@ -7,7 +7,10 @@ import { jwt } from "../utils/jwt";
 import { AuthenticatedRequest } from "../types/AuthenticatedRequest";
 import { getUpdatedvalues } from "../services/profile/updatedValues";
 import { HttpStatusCode } from "../types/HttpStatusCode";
-import { emailExisted, usernameExisted } from "../services/auth/checkDuplicates";
+import {
+  emailExisted,
+  usernameExisted,
+} from "../services/auth/checkDuplicates";
 
 dotenv.config();
 
@@ -41,7 +44,9 @@ const register = async (req: Request, res: Response) => {
   const collection = (await db).db("sakugwej").collection("users");
   try {
     const salt = crypto.lib.WordArray.random(64).toString();
-    const hashedPass = crypto.SHA256(salt + password + process.env.PASS_SECRET!).toString();
+    const hashedPass = crypto
+      .SHA256(salt + password + process.env.PASS_SECRET!)
+      .toString();
     collection.insertOne({
       username: username,
       email: email,
@@ -83,7 +88,9 @@ const login = async (req: Request, res: Response) => {
       });
       return;
     }
-    const hashedPass = crypto.SHA256(result.salt + password + process.env.PASS_SECRET!).toString();
+    const hashedPass = crypto
+      .SHA256(result.salt + password + process.env.PASS_SECRET!)
+      .toString();
     if (hashedPass != result.password) {
       res.status(403).send({
         message: "Incorrect password",
