@@ -11,6 +11,13 @@ import {
   updateAccount,
   deleteAccount,
 } from "../controller/accountController";
+import {
+  getTransactions,
+  addTransaction,
+  updateTransaction,
+  deleteTransaction,
+} from "../controller/transactionController";
+
 import { test } from "../controller/mainController";
 import { jsonParser } from "../middleware/jsonParser";
 import { verifyToken } from "../middleware/verifyToken";
@@ -35,5 +42,10 @@ router.get("/accounts", verifyToken, getAccounts);
 router.post("/accounts", jsonParser, verifyToken, addAccount);
 router.patch("/accounts", jsonParser, verifyToken, updateAccount);
 router.delete("/accounts", jsonParser, verifyToken, deleteAccount);
+
+router.get("/transactions", verifyToken, getTransactions);
+router.post("/transactions", jsonParser, verifyToken, addTransaction);
+router.patch("/transactions", jsonParser, verifyToken, updateTransaction);
+router.delete("/transactions", jsonParser, verifyToken, deleteTransaction);
 
 export { router };

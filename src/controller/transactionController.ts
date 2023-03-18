@@ -6,12 +6,11 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const getAccounts = async (
+const getTransactions = async (
   req: Request & { token?: string; token_data?: Record<any, any> },
   res: Response
 ) => {
   try {
-    // check if user exists
     const checkUser = (await db).db("sakugwej").collection("users");
     let query = { _id: req.token_data?._id };
     let user = await checkUser.findOne(query);
@@ -21,19 +20,19 @@ const getAccounts = async (
       });
       return;
     }
-    const collection = (await db).db("sakugwej").collection("accounts");
-    let query2 = { userId: req.token_data?._id };
+    const collection = (await db).db("sakugwej").collection("transactions");
+    let query2 = { user_id: req.token_data?._id };
     let cursor = collection.find(query2);
     if (await collection.countDocuments(query2) === 0) {
       res.status(400).send({
-        message: "Account not found",
+        message: "Transaction not found",
       });
       return;
     }
     let result = await cursor.toArray();
     res.status(200).send({
-      message: "Account(s) found",
-      data: {...result, _id: undefined},
+      message: "Transaction(s) found",
+      data: { ...result, _id: undefined }
     });
     return;
   } catch (err) {
@@ -44,7 +43,7 @@ const getAccounts = async (
   }
 };
 
-const addAccount = async (req: AuthenticatedRequest, res: Response) => {
+const addTransaction = async (req: AuthenticatedRequest, res: Response) => {
   if (!req.body) {
     res.status(400).send({
       message: "Bad Payload",
@@ -52,7 +51,6 @@ const addAccount = async (req: AuthenticatedRequest, res: Response) => {
     return;
   }
   try {
-    // check if user exists
     const checkUser = (await db).db("sakugwej").collection("users");
     let query = { _id: req.token_data?._id };
     let user = await checkUser.findOne(query);
@@ -62,15 +60,27 @@ const addAccount = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
-    const collection = (await db).db("sakugwej").collection("accounts");
+    const checkAccount = (await db).db("sakugwej").collection("accounts");
+    let query2 = { userId: req.token_data?._id, accountId: req.body.accountId };
+    let acc = await checkAccount.findOne(query2);
+    if (!acc) {
+      res.status(400).send({
+        message: "Account not found",
+      });
+      return;
+    }
+    const collection = (await db).db("sakugwej").collection("transactions");
     const addDocument = {
       userId: req.token_data?._id,
-      accountName: req.body.account_name,
-      accountNumber: req.body.account_number,
-    };
+      accountId: req.body.accountId,
+      type: req.body.type,
+      amount: req.body.amount,
+      description: req.body.description,
+      createdAt: req.body.date,
+    }
     const addResult = await collection.insertOne(addDocument);
     res.status(HttpStatusCode.CREATED).send({
-      message: "Account added",
+      message: "Transaction added successfully",
     });
   } catch (err) {
     console.log(err);
@@ -80,7 +90,7 @@ const addAccount = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
+const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
   if (!req.body) {
     res.status(400).send({
       message: "Bad Payload",
@@ -97,18 +107,29 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
-    const collection = (await db).db("sakugwej").collection("accounts");
+    const checkAccount = (await db).db("sakugwej").collection("accounts");
+    let query2 = { user_id: req.token_data?._id, accountId: req.body.accountId };
+    let acc = await checkAccount.findOne(query2);
+    if (!acc) {
+      res.status(400).send({
+        message: "Account not found",
+      });
+      return;
+    }
+    const collection = (await db).db("sakugwej").collection("transactions");
     let filter = { userId: req.token_data?._id };
-    // update only the fields that are provided
     const updateDocument = {
       $set: {
-        accountName: req.body.accountName,
-        accountNumber: req.body.accountNumber,
+        accountId: req.body.accountId,
+        type: req.body.type,
+        amount: req.body.amount,
+        description: req.body.description,
+        createdAt: req.body.date,
       },
     };
     const updResult = await collection.updateOne(filter, updateDocument);
     res.status(200).send({
-      message: "Account updated successfully",
+      message: "Transaction updated successfully",
     });
     return;
   } catch (err) {
@@ -119,7 +140,7 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-const deleteAccount = async (req: AuthenticatedRequest, res: Response) => {
+const deleteTransaction = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const checkUser = (await db).db("sakugwej").collection("users");
     let query = { _id: req.token_data?._id };
@@ -130,19 +151,27 @@ const deleteAccount = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
-    const collection = (await db).db("sakugwej").collection("accounts");
+    const checkAccount = (await db).db("sakugwej").collection("accounts");
+    let query2 = { user_id: req.token_data?._id, accountId: req.body.accountId };
+    let acc = await checkAccount.findOne(query2);
+    if (!acc) {
+      res.status(400).send({
+        message: "Account not found",
+      });
+      return;
+    }
+    const collection = (await db).db("sakugwej").collection("transactions");
     let filter = { userId: req.token_data?._id };
     const delResult = await collection.deleteOne(filter);
     res.status(200).send({
-      message: "Account deleted successfully",
+      message: "Transaction deleted successfully",
     });
-    return;
   } catch (err) {
     console.log(err);
     res.status(500).send({
       message: "Internal server error",
     });
   }
-};
+}
 
-export { getAccounts, addAccount, updateAccount, deleteAccount };
+export { getTransactions, addTransaction, updateTransaction, deleteTransaction };
