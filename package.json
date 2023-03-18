@@ -6,7 +6,8 @@
   "scripts": {
     "build": "npx tsc",
     "dev": "nodemon -L -e ts -w ./src src/server.ts",
-    "test": "mocha"
+    "test": "mocha",
+    "lint": "prettier --write ./src/**/*.ts && prettier --check ./src/**/*.ts"
   },
   "repository": {
     "type": "git",

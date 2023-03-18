@@ -32,8 +32,8 @@ router.post("/user/change-profile", jsonParser, verifyToken, changeProfile);
 router.get("/user/profile", verifyToken, getProfile);
 
 router.get("/accounts", verifyToken, getAccounts);
-router.post("/accounts/add", jsonParser, verifyToken, addAccount);
-router.post("/accounts/update", jsonParser, verifyToken, updateAccount);
-router.post("/accounts/delete", jsonParser, verifyToken, deleteAccount);
+router.post("/accounts", jsonParser, verifyToken, addAccount);
+router.patch("/accounts", jsonParser, verifyToken, updateAccount);
+router.delete("/accounts", jsonParser, verifyToken, deleteAccount);
 
 export { router };
