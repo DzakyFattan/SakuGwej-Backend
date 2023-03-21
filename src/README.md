@@ -314,3 +314,128 @@
   "message": "{Error message}"
 }
 ```
+
+## Debts
+
+### GET: /api/v1/debts
+
+#### Required:
+
+- JWT (as bearer token)
+
+#### Response:
+
+- 200 OK with JSON Payload:
+
+```json
+{
+  "message": "Account",
+  "data": [
+    {
+      "userId": "{userId}",
+      "accountId": "{accountId}",
+      "type": "{type}",
+      "amount": "{amount}",
+      "name": "{name}",
+      "description": "{description}",
+      "startDate": "{startDate}",
+      "dueDate": "{dueDate}"
+    },
+    {
+      /* ... */
+    }
+    //...
+  ]
+}
+```
+
+- 4xx with JSON Payload:
+
+```json
+{
+  "message": "{Error message}"
+}
+```
+
+### POST: /api/v1/debts
+
+#### Required (as JSON payload):
+
+- userId
+- accountId
+- type
+- name
+- amount
+- description
+- startDate
+- endDate
+
+#### Response:
+
+- 201 CREATED
+- 4XX with JSON Payload:
+
+```json
+{
+  "message": "{Error message}"
+}
+```
+
+### PATCH: /api/v1/debts
+
+#### Required:
+
+- JWT (as bearer token)
+
+#### Optional (as JSON payload):
+
+- userId
+- accountId
+- type
+- name
+- amount
+- description
+- startDate
+- endDate
+
+#### Response:
+
+- 200 OK with JSON payload:
+
+```json
+{
+  "message": "Debt updated successfully"
+}
+```
+
+- 4XX with JSON Payload:
+
+```json
+{
+  "message": "{Error message}"
+}
+```
+
+### DELETE: /api/v1/debts
+
+#### Required:
+
+- JWT (as bearer token)
+
+#### Response:
+
+- 200 OK with JSON payload:
+
+```json
+{
+  "message": "Debt deleted successfully"
+}
+```
+
+- 4XX with JSON Payload:
+
+```json
+{
+  "message": "{Error message}"
+}
+```

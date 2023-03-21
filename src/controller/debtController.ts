@@ -6,12 +6,11 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const getAccounts = async (
+const getDebts = async (
   req: Request & { token?: string; token_data?: Record<any, any> },
   res: Response
 ) => {
   try {
-    // check if user exists
     const checkUser = (await db).db("sakugwej").collection("users");
     let query = { _id: req.token_data?._id };
     let user = await checkUser.findOne(query);
@@ -21,21 +20,20 @@ const getAccounts = async (
       });
       return;
     }
-    const collection = (await db).db("sakugwej").collection("accounts");
+    const collection = (await db).db("sakugwej").collection("debts");
     let query2 = { userId: req.token_data?._id };
     let cursor = collection.find(query2);
     if ((await collection.countDocuments(query2)) === 0) {
       res.status(400).send({
-        message: "Account not found",
+        message: "Debt not found",
       });
       return;
     }
     let result = await cursor.toArray();
     res.status(200).send({
-      message: "Account(s) found",
+      message: "Debt(s) found",
       data: { ...result, _id: undefined },
     });
-    return;
   } catch (err) {
     console.log(err);
     res.status(500).send({
@@ -44,7 +42,7 @@ const getAccounts = async (
   }
 };
 
-const addAccount = async (req: AuthenticatedRequest, res: Response) => {
+const addDebt = async (req: AuthenticatedRequest, res: Response) => {
   if (!req.body) {
     res.status(400).send({
       message: "Bad Payload",
@@ -52,7 +50,6 @@ const addAccount = async (req: AuthenticatedRequest, res: Response) => {
     return;
   }
   try {
-    // check if user exists
     const checkUser = (await db).db("sakugwej").collection("users");
     let query = { _id: req.token_data?._id };
     let user = await checkUser.findOne(query);
@@ -62,15 +59,29 @@ const addAccount = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
-    const collection = (await db).db("sakugwej").collection("accounts");
-    const addDocument = {
+    const checkAccount = (await db).db("sakugwej").collection("accounts");
+    let query2 = { userId: req.token_data?._id, accountId: req.body.accountId };
+    let acc = await checkAccount.findOne(query2);
+    if (!acc) {
+      res.status(400).send({
+        message: "Account not found",
+      });
+      return;
+    }
+    const collection = (await db).db("sakugwej").collection("debts");
+    const addDebt = {
       userId: req.token_data?._id,
-      accountName: req.body.account_name,
-      accountNumber: req.body.account_number,
+      accountId: req.body.accountId,
+      type: req.body.type,
+      amount: req.body.amount,
+      name: req.body.name,
+      description: req.body.description,
+      startDate: req.body.startDate,
+      dueDate: req.body.dueDate,
     };
-    const addResult = await collection.insertOne(addDocument);
+    const addResult = await collection.insertOne(addDebt);
     res.status(HttpStatusCode.CREATED).send({
-      message: "Account added",
+      message: "Debt added successfully",
     });
   } catch (err) {
     console.log(err);
@@ -80,7 +91,7 @@ const addAccount = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
+const updateDebt = async (req: AuthenticatedRequest, res: Response) => {
   if (!req.body) {
     res.status(400).send({
       message: "Bad Payload",
@@ -97,20 +108,35 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
-    const collection = (await db).db("sakugwej").collection("accounts");
+    const checkAccount = (await db).db("sakugwej").collection("accounts");
+    let query2 = {
+      user_id: req.token_data?._id,
+      accountId: req.body.accountId,
+    };
+    let acc = await checkAccount.findOne(query2);
+    if (!acc) {
+      res.status(400).send({
+        message: "Account not found",
+      });
+      return;
+    }
+    const collection = (await db).db("sakugwej").collection("debts");
     let filter = { userId: req.token_data?._id };
-    // update only the fields that are provided
     const updateDocument = {
       $set: {
-        accountName: req.body.accountName,
-        accountNumber: req.body.accountNumber,
+        accountId: req.body.accountId,
+        type: req.body.type,
+        amount: req.body.amount,
+        name: req.body.name,
+        description: req.body.description,
+        startDate: req.body.startDate,
+        dueDate: req.body.dueDate,
       },
     };
     const updResult = await collection.updateOne(filter, updateDocument);
     res.status(200).send({
-      message: "Account updated successfully",
+      message: "Debt updated successfully",
     });
-    return;
   } catch (err) {
     console.log(err);
     res.status(500).send({
@@ -119,7 +145,7 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-const deleteAccount = async (req: AuthenticatedRequest, res: Response) => {
+const deleteDebt = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const checkUser = (await db).db("sakugwej").collection("users");
     let query = { _id: req.token_data?._id };
@@ -130,13 +156,24 @@ const deleteAccount = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
-    const collection = (await db).db("sakugwej").collection("accounts");
+    const checkAccount = (await db).db("sakugwej").collection("accounts");
+    let query2 = {
+      user_id: req.token_data?._id,
+      accountId: req.body.accountId,
+    };
+    let acc = await checkAccount.findOne(query2);
+    if (!acc) {
+      res.status(400).send({
+        message: "Account not found",
+      });
+      return;
+    }
+    const collection = (await db).db("sakugwej").collection("debts");
     let filter = { userId: req.token_data?._id };
     const delResult = await collection.deleteOne(filter);
     res.status(200).send({
-      message: "Account deleted successfully",
+      message: "Debt deleted successfully",
     });
-    return;
   } catch (err) {
     console.log(err);
     res.status(500).send({
@@ -145,4 +182,4 @@ const deleteAccount = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-export { getAccounts, addAccount, updateAccount, deleteAccount };
+export { getDebts, addDebt, updateDebt, deleteDebt };

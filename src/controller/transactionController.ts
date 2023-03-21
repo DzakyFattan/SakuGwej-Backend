@@ -23,7 +23,7 @@ const getTransactions = async (
     const collection = (await db).db("sakugwej").collection("transactions");
     let query2 = { user_id: req.token_data?._id };
     let cursor = collection.find(query2);
-    if (await collection.countDocuments(query2) === 0) {
+    if ((await collection.countDocuments(query2)) === 0) {
       res.status(400).send({
         message: "Transaction not found",
       });
@@ -32,7 +32,7 @@ const getTransactions = async (
     let result = await cursor.toArray();
     res.status(200).send({
       message: "Transaction(s) found",
-      data: { ...result, _id: undefined }
+      data: { ...result, _id: undefined },
     });
     return;
   } catch (err) {
@@ -77,7 +77,7 @@ const addTransaction = async (req: AuthenticatedRequest, res: Response) => {
       amount: req.body.amount,
       description: req.body.description,
       createdAt: req.body.date,
-    }
+    };
     const addResult = await collection.insertOne(addDocument);
     res.status(HttpStatusCode.CREATED).send({
       message: "Transaction added successfully",
@@ -108,7 +108,10 @@ const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
     const checkAccount = (await db).db("sakugwej").collection("accounts");
-    let query2 = { user_id: req.token_data?._id, accountId: req.body.accountId };
+    let query2 = {
+      user_id: req.token_data?._id,
+      accountId: req.body.accountId,
+    };
     let acc = await checkAccount.findOne(query2);
     if (!acc) {
       res.status(400).send({
@@ -152,7 +155,10 @@ const deleteTransaction = async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
     const checkAccount = (await db).db("sakugwej").collection("accounts");
-    let query2 = { user_id: req.token_data?._id, accountId: req.body.accountId };
+    let query2 = {
+      user_id: req.token_data?._id,
+      accountId: req.body.accountId,
+    };
     let acc = await checkAccount.findOne(query2);
     if (!acc) {
       res.status(400).send({
@@ -172,6 +178,11 @@ const deleteTransaction = async (req: AuthenticatedRequest, res: Response) => {
       message: "Internal server error",
     });
   }
-}
+};
 
-export { getTransactions, addTransaction, updateTransaction, deleteTransaction };
+export {
+  getTransactions,
+  addTransaction,
+  updateTransaction,
+  deleteTransaction,
+};
