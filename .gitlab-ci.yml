@@ -37,6 +37,7 @@ unit-test-job:
 
 deploy-dev-job:
   stage: deploy
+  image: "docker:20.10.16"
   script:
     - docker stop ppl-backend-dev || true
     - docker rm ppl-backend-dev || true
