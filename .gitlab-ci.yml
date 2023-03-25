@@ -29,10 +29,10 @@ unit-test-job:
   stage: test
   image: "node:19-alpine"
   script:
-    - npm i
-    - npm i mocha
+    # - npm i
+    # - npm i mocha
     # - npm test 				# Tests later when there is actually something to test
-    - sleep 3
+    # - sleep 3
     - echo "Guess it works"
 
 deploy-dev-job:
