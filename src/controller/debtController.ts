@@ -60,29 +60,18 @@ const addDebt = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
-    const checkAccount = (await db).db("sakugwej").collection("accounts");
-    let query2 = { userId: new ObjectId(req.token_data?._id), accountId: req.body.accountId };
-    let acc = await checkAccount.findOne(query2);
-    if (!acc) {
-      res.status(400).send({
-        message: "Account not found",
-      });
-      return;
-    }
     const collection = (await db).db("sakugwej").collection("debts");
     const addDebt = {
       userId: new ObjectId(req.token_data?._id),
-      accountId: req.body.accountId,
       type: req.body.type,
       amount: req.body.amount,
       name: req.body.name,
       description: req.body.description,
-      startDate: req.body.startDate,
       dueDate: req.body.dueDate,
     };
     const addResult = await collection.insertOne(addDebt);
     res.status(HttpStatusCode.CREATED).send({
-      message: "Debt added successfully",
+      message: "Debt added successfully with id " + addResult.insertedId,
     });
   } catch (err) {
     console.log(err);

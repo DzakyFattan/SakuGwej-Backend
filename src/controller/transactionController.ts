@@ -52,8 +52,9 @@ const addTransaction = async (req: AuthenticatedRequest, res: Response) => {
     return;
   }
   try {
+    const _userId = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: new ObjectId(req.token_data?._id) };
+    let query = { _id: _userId };
     let user = await checkUser.findOne(query);
     if (!user) {
       res.status(400).send({
@@ -61,8 +62,9 @@ const addTransaction = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
+    const _accountId = new ObjectId(req.body.accountId);
     const checkAccount = (await db).db("sakugwej").collection("accounts");
-    let query2 = { userId: new ObjectId(req.token_data?._id), accountId: req.body.accountId };
+    let query2 = { _id : _accountId, userId: _userId };
     let acc = await checkAccount.findOne(query2);
     if (!acc) {
       res.status(400).send({
@@ -72,16 +74,16 @@ const addTransaction = async (req: AuthenticatedRequest, res: Response) => {
     }
     const collection = (await db).db("sakugwej").collection("transactions");
     const addDocument = {
-      userId: new ObjectId(req.token_data?._id),
-      accountId: req.body.accountId,
+      userId: new ObjectId(req.token_data?._id), 
       type: req.body.type,
       amount: req.body.amount,
-      description: req.body.description,
-      createdAt: req.body.date,
+      category: req.body.category,
+      accountId: req.body.accountId,
+      createdAt: req.body.createdAt,
     };
     const addResult = await collection.insertOne(addDocument);
     res.status(HttpStatusCode.CREATED).send({
-      message: "Transaction added successfully",
+      message: "Transaction added successfully with id " + addResult.insertedId,
     });
   } catch (err) {
     console.log(err);

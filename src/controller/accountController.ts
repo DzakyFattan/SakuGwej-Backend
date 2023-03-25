@@ -13,8 +13,9 @@ const getAccounts = async (
 ) => {
   try {
     // check if user exists
+    const userId  = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: new ObjectId(req.token_data?._id) };
+    let query = { _id: userId };
     let user = await checkUser.findOne(query);
     if (!user) {
       res.status(400).send({
@@ -23,7 +24,7 @@ const getAccounts = async (
       return;
     }
     const collection = (await db).db("sakugwej").collection("accounts");
-    let query2 = { userId: new ObjectId(req.token_data?._id) };
+    let query2 = { userId: userId };
     let cursor = collection.find(query2);
     if ((await collection.countDocuments(query2)) === 0) {
       res.status(400).send({
@@ -54,8 +55,9 @@ const addAccount = async (req: AuthenticatedRequest, res: Response) => {
   }
   try {
     // check if user exists
+    const _userId    = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: new ObjectId(req.token_data?._id) };
+    let query = { _id: _userId };
     let user = await checkUser.findOne(query);
     if (!user) {
       res.status(400).send({
@@ -63,15 +65,16 @@ const addAccount = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
-    const collection = (await db).db("sakugwej").collection("accounts");
+    const collection  = (await db).db("sakugwej").collection("accounts");
     const addDocument = {
-      userId: new ObjectId(req.token_data?._id),
+      userId: _userId,
       accountName: req.body.account_name,
       accountNumber: req.body.account_number,
+      accounrDecsription: req.body.account_description,
     };
     const addResult = await collection.insertOne(addDocument);
     res.status(HttpStatusCode.CREATED).send({
-      message: "Account added",
+      message: "Account added successfully with id " + addResult.insertedId,
     });
   } catch (err) {
     console.log(err);
@@ -89,8 +92,9 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
     return;
   }
   try {
+    const _userId   = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: new ObjectId(req.token_data?._id) };
+    let query = { _id: _userId };
     let user = await checkUser.findOne(query);
     if (!user) {
       res.status(400).send({
@@ -99,7 +103,7 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
     const collection = (await db).db("sakugwej").collection("accounts");
-    let filter = { userId: new ObjectId(req.token_data?._id) };
+    let filter = { userId: _userId };
     // update only the fields that are provided
     const updateDocument = {
       $set: {
@@ -122,8 +126,9 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
 
 const deleteAccount = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const _userId   = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: new ObjectId(req.token_data?._id) };
+    let query = { _id: _userId };
     let user = await checkUser.findOne(query);
     if (!user) {
       res.status(400).send({
@@ -132,7 +137,7 @@ const deleteAccount = async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
     const collection = (await db).db("sakugwej").collection("accounts");
-    let filter = { userId: new ObjectId(req.token_data?._id) };
+    let filter = { userId: _userId };
     const delResult = await collection.deleteOne(filter);
     res.status(200).send({
       message: "Account deleted successfully",
