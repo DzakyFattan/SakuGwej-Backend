@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { AuthenticatedRequest } from "../types/AuthenticatedRequest";
 import { HttpStatusCode } from "../types/HttpStatusCode";
 import db from "../utils/db";
+import { ObjectId } from "mongodb";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -12,7 +13,7 @@ const getDebts = async (
 ) => {
   try {
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: req.token_data?._id };
+    let query = { _id: new ObjectId(req.token_data?._id) };
     let user = await checkUser.findOne(query);
     if (!user) {
       res.status(400).send({
@@ -21,7 +22,7 @@ const getDebts = async (
       return;
     }
     const collection = (await db).db("sakugwej").collection("debts");
-    let query2 = { userId: req.token_data?._id };
+    let query2 = { userId: new ObjectId(req.token_data?._id) };
     let cursor = collection.find(query2);
     if ((await collection.countDocuments(query2)) === 0) {
       res.status(400).send({
@@ -51,7 +52,7 @@ const addDebt = async (req: AuthenticatedRequest, res: Response) => {
   }
   try {
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: req.token_data?._id };
+    let query = { _id: new ObjectId(req.token_data?._id) };
     let user = await checkUser.findOne(query);
     if (!user) {
       res.status(400).send({
@@ -60,7 +61,7 @@ const addDebt = async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
     const checkAccount = (await db).db("sakugwej").collection("accounts");
-    let query2 = { userId: req.token_data?._id, accountId: req.body.accountId };
+    let query2 = { userId: new ObjectId(req.token_data?._id), accountId: req.body.accountId };
     let acc = await checkAccount.findOne(query2);
     if (!acc) {
       res.status(400).send({
@@ -70,7 +71,7 @@ const addDebt = async (req: AuthenticatedRequest, res: Response) => {
     }
     const collection = (await db).db("sakugwej").collection("debts");
     const addDebt = {
-      userId: req.token_data?._id,
+      userId: new ObjectId(req.token_data?._id),
       accountId: req.body.accountId,
       type: req.body.type,
       amount: req.body.amount,
@@ -100,7 +101,7 @@ const updateDebt = async (req: AuthenticatedRequest, res: Response) => {
   }
   try {
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: req.token_data?._id };
+    let query = { _id: new ObjectId(req.token_data?._id) };
     let user = await checkUser.findOne(query);
     if (!user) {
       res.status(400).send({
@@ -110,7 +111,7 @@ const updateDebt = async (req: AuthenticatedRequest, res: Response) => {
     }
     const checkAccount = (await db).db("sakugwej").collection("accounts");
     let query2 = {
-      user_id: req.token_data?._id,
+      user_id: new ObjectId(req.token_data?._id),
       accountId: req.body.accountId,
     };
     let acc = await checkAccount.findOne(query2);
@@ -121,7 +122,7 @@ const updateDebt = async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
     const collection = (await db).db("sakugwej").collection("debts");
-    let filter = { userId: req.token_data?._id };
+    let filter = { userId: new ObjectId(req.token_data?._id) };
     const updateDocument = {
       $set: {
         accountId: req.body.accountId,
@@ -148,7 +149,7 @@ const updateDebt = async (req: AuthenticatedRequest, res: Response) => {
 const deleteDebt = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: req.token_data?._id };
+    let query = { _id: new ObjectId(req.token_data?._id) };
     let user = await checkUser.findOne(query);
     if (!user) {
       res.status(400).send({
@@ -158,7 +159,7 @@ const deleteDebt = async (req: AuthenticatedRequest, res: Response) => {
     }
     const checkAccount = (await db).db("sakugwej").collection("accounts");
     let query2 = {
-      user_id: req.token_data?._id,
+      user_id: new ObjectId(req.token_data?._id),
       accountId: req.body.accountId,
     };
     let acc = await checkAccount.findOne(query2);
@@ -169,7 +170,7 @@ const deleteDebt = async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
     const collection = (await db).db("sakugwej").collection("debts");
-    let filter = { userId: req.token_data?._id };
+    let filter = { userId: new ObjectId(req.token_data?._id) };
     const delResult = await collection.deleteOne(filter);
     res.status(200).send({
       message: "Debt deleted successfully",
