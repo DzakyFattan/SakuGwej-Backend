@@ -4,6 +4,7 @@ import {
   login,
   changeProfile,
   getProfile,
+  changeProfilePicture,
 } from "../controller/userController";
 import {
   getAccounts,
@@ -26,6 +27,7 @@ import {
 import { test } from "../controller/mainController";
 import { jsonParser } from "../middleware/jsonParser";
 import { verifyToken } from "../middleware/verifyToken";
+import { formDataParser } from "../middleware/formDataParser";
 import cors from "cors";
 
 const router = Router();
@@ -42,6 +44,7 @@ router.post("/user/register", jsonParser, register);
 router.post("/user/login", jsonParser, login);
 router.post("/user/change-profile", jsonParser, verifyToken, changeProfile);
 router.get("/user/profile", verifyToken, getProfile);
+router.post("/user/change-profile-picture", formDataParser, verifyToken, changeProfilePicture);
 
 router.get("/accounts", verifyToken, getAccounts);
 router.post("/accounts", jsonParser, verifyToken, addAccount);
