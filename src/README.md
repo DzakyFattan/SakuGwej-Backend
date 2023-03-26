@@ -106,7 +106,8 @@
     {
       "userId": "{userId}",
       "accountName": "{accountName}",
-      "accountNumber": "{accountNumber}"
+      "accountNumber": "{accountNumber}",
+      "accountDescription": "{accountDescription}"
     },
     {
       /* ... */
@@ -130,6 +131,7 @@
 - userId
 - accountName
 - accountNumber
+- accountDescription
 
 #### Response:
 
@@ -153,6 +155,7 @@
 - userId
 - accountName
 - accountNumber
+- accountDescriptiom
 
 #### Response:
 
@@ -217,6 +220,7 @@
       "accountId": "{accountId}",
       "type": "{type}",
       "amount": "{amount}",
+      "category": "{category}",
       "description": "{description}",
       "createdAt": "{createdAt}"
     },
@@ -244,6 +248,7 @@
 - accountId
 - type
 - amount
+- category
 - description
 - createdAt
 
@@ -270,6 +275,7 @@
 - accountId
 - type
 - amount
+- category
 - description
 - createdAt
 
@@ -333,7 +339,6 @@
   "data": [
     {
       "userId": "{userId}",
-      "accountId": "{accountId}",
       "type": "{type}",
       "amount": "{amount}",
       "name": "{name}",
@@ -362,10 +367,10 @@
 #### Required (as JSON payload):
 
 - userId
-- accountId
+- ~~accountId~~
 - type
-- name
 - amount
+- name
 - description
 - startDate
 - endDate
@@ -390,10 +395,10 @@
 #### Optional (as JSON payload):
 
 - userId
-- accountId
+- ~~accountId~~
 - type
-- name
 - amount
+- name
 - description
 - startDate
 - endDate

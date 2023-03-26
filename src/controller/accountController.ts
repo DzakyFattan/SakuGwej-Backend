@@ -70,7 +70,7 @@ const addAccount = async (req: AuthenticatedRequest, res: Response) => {
       userId: _userId,
       accountName: req.body.account_name,
       accountNumber: req.body.account_number,
-      accounrDecsription: req.body.account_description,
+      accountDescription: req.body.account_description,
     };
     const addResult = await collection.insertOne(addDocument);
     res.status(HttpStatusCode.CREATED).send({
@@ -109,6 +109,7 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
       $set: {
         accountName: req.body.accountName,
         accountNumber: req.body.accountNumber,
+        accountDescription: req.body.account_description,
       },
     };
     const updResult = await collection.updateOne(filter, updateDocument);

@@ -52,9 +52,9 @@ const addTransaction = async (req: AuthenticatedRequest, res: Response) => {
     return;
   }
   try {
-    const _userId = new ObjectId(req.token_data?._id);
+    const userId = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: _userId };
+    let query = { _id: userId };
     let user = await checkUser.findOne(query);
     if (!user) {
       res.status(400).send({
@@ -62,9 +62,9 @@ const addTransaction = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
-    const _accountId = new ObjectId(req.body.accountId);
+    const accountId = new ObjectId(req.body.accountId);
     const checkAccount = (await db).db("sakugwej").collection("accounts");
-    let query2 = { _id : _accountId, userId: _userId };
+    let query2 = { _id : accountId, userId: userId };
     let acc = await checkAccount.findOne(query2);
     if (!acc) {
       res.status(400).send({
@@ -74,11 +74,12 @@ const addTransaction = async (req: AuthenticatedRequest, res: Response) => {
     }
     const collection = (await db).db("sakugwej").collection("transactions");
     const addDocument = {
-      userId: new ObjectId(req.token_data?._id), 
+      userId: userId,
+      accountId: accountId, 
       type: req.body.type,
       amount: req.body.amount,
       category: req.body.category,
-      accountId: req.body.accountId,
+      description: req.body.description,
       createdAt: req.body.createdAt,
     };
     const addResult = await collection.insertOne(addDocument);
@@ -101,8 +102,9 @@ const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
     return;
   }
   try {
+    const userId = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: new ObjectId(req.token_data?._id) };
+    let query = { _id: userId };
     let user = await checkUser.findOne(query);
     if (!user) {
       res.status(400).send({
@@ -110,10 +112,11 @@ const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
+    const accountId = new ObjectId(req.body.accountId);
     const checkAccount = (await db).db("sakugwej").collection("accounts");
     let query2 = {
-      user_id: new ObjectId(req.token_data?._id),
-      accountId: req.body.accountId,
+      userId: userId,
+      accountId: accountId,
     };
     let acc = await checkAccount.findOne(query2);
     if (!acc) {
@@ -126,9 +129,10 @@ const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
     let filter = { userId: new ObjectId(req.token_data?._id) };
     const updateDocument = {
       $set: {
-        accountId: req.body.accountId,
+        accountId: accountId,
         type: req.body.type,
         amount: req.body.amount,
+        category: req.body.category,
         description: req.body.description,
         createdAt: req.body.date,
       },
@@ -148,24 +152,13 @@ const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
 
 const deleteTransaction = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const userId = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: new ObjectId(req.token_data?._id) };
+    let query = { _id: userId };
     let user = await checkUser.findOne(query);
     if (!user) {
       res.status(400).send({
         message: "User not found",
-      });
-      return;
-    }
-    const checkAccount = (await db).db("sakugwej").collection("accounts");
-    let query2 = {
-      user_id: new ObjectId(req.token_data?._id),
-      accountId: req.body.accountId,
-    };
-    let acc = await checkAccount.findOne(query2);
-    if (!acc) {
-      res.status(400).send({
-        message: "Account not found",
       });
       return;
     }
