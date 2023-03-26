@@ -1,7 +1,3 @@
-var imageMimeType = [
-    'image/png',
-    'image/jpeg',
-    'image/gif',
-];
+var imageMimeType = ["image/png", "image/jpeg", "image/gif"];
 
-export { imageMimeType }
+export { imageMimeType };

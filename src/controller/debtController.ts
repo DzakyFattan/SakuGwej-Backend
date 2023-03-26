@@ -7,10 +7,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const getDebts = async (
-  req: Request & { token?: string; token_data?: Record<any, any> },
-  res: Response
-) => {
+const getDebts = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const checkUser = (await db).db("sakugwej").collection("users");
     let query = { _id: new ObjectId(req.token_data?._id) };

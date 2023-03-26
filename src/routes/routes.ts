@@ -44,7 +44,12 @@ router.post("/user/register", jsonParser, register);
 router.post("/user/login", jsonParser, login);
 router.post("/user/change-profile", jsonParser, verifyToken, changeProfile);
 router.get("/user/profile", verifyToken, getProfile);
-router.post("/user/change-profile-picture", formDataParser, verifyToken, changeProfilePicture);
+router.post(
+  "/user/change-profile-picture",
+  formDataParser,
+  verifyToken,
+  changeProfilePicture
+);
 
 router.get("/accounts", verifyToken, getAccounts);
 router.post("/accounts", jsonParser, verifyToken, addAccount);

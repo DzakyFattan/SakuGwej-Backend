@@ -7,10 +7,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const getTransactions = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
+const getTransactions = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const checkUser = (await db).db("sakugwej").collection("users");
     let query = { _id: new ObjectId(req.token_data?._id) };
@@ -64,7 +61,7 @@ const addTransaction = async (req: AuthenticatedRequest, res: Response) => {
     }
     const accountId = new ObjectId(req.body.accountId);
     const checkAccount = (await db).db("sakugwej").collection("accounts");
-    let query2 = { _id : accountId, userId: userId };
+    let query2 = { _id: accountId, userId: userId };
     let acc = await checkAccount.findOne(query2);
     if (!acc) {
       res.status(400).send({
@@ -75,7 +72,7 @@ const addTransaction = async (req: AuthenticatedRequest, res: Response) => {
     const collection = (await db).db("sakugwej").collection("transactions");
     const addDocument = {
       userId: userId,
-      accountId: accountId, 
+      accountId: accountId,
       type: req.body.type,
       amount: req.body.amount,
       category: req.body.category,

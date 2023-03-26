@@ -1,11 +1,8 @@
 import { Request, Response } from "express";
 import { jwt } from "../utils/jwt";
+import { AuthenticatedRequest } from "../types/AuthenticatedRequest";
 
-function verifyToken(
-  req: Request & { token?: string; token_data?: Record<any, any> },
-  res: Response,
-  next: Function
-) {
+function verifyToken(req: AuthenticatedRequest, res: Response, next: Function) {
   const bearerHeader = req.headers["authorization"];
   if (typeof bearerHeader !== "undefined") {
     const bearer = bearerHeader.split(" ");

@@ -54,7 +54,7 @@ const register = async (req: Request, res: Response) => {
       email: email,
       password: hashedPass,
       salt: salt,
-      theme: "bochi_the_default"
+      theme: "bochi_the_default",
     });
     res.status(HttpStatusCode.CREATED).send();
   } catch (err) {
@@ -118,7 +118,10 @@ const login = async (req: Request, res: Response) => {
   }
 };
 
-const changeProfilePicture = async (req: AuthenticatedRequest, res: Response) => {
+const changeProfilePicture = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
   if (req.files.length == 0 || req.files.length > 1) {
     res.status(HttpStatusCode.BAD_REQUEST).send({
       message: "Invalid File Amount",
@@ -126,78 +129,75 @@ const changeProfilePicture = async (req: AuthenticatedRequest, res: Response) =>
     return;
   }
   let imageFile = req.files[0];
-  if (!(imageMimeType.includes(imageFile.mimetype))) {
+  if (!imageMimeType.includes(imageFile.mimetype)) {
     res.status(HttpStatusCode.BAD_REQUEST).send({
       message: "Invalid File Type",
     });
     return;
   }
-  
-  try {
 
+  try {
     let s3 = new AWS.S3();
-  
+
     // upload to s3
     let params = {
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: Math.floor(Date.now() / 1000) + "_" + imageFile.originalname,
       Body: imageFile.buffer,
-      ContentType: imageFile.mimetype
-    }
-    const uploadData = await  s3.upload(params, (err: any) => {
-      if (err) {
-        console.log(err)
-        res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send();
-        return;
-      } 
-    }).promise();
-    
-    
+      ContentType: imageFile.mimetype,
+    };
+    const uploadData = await s3
+      .upload(params, (err: any) => {
+        if (err) {
+          console.log(err);
+          res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send();
+          return;
+        }
+      })
+      .promise();
+
     // update on successful upload
     const collection = (await db).db("sakugwej").collection("users");
     let query = { _id: new ObjectId(req.token_data?._id) };
     let update = {
       $set: {
-        profilePicture: uploadData.Location
-      }
-    }
+        profilePicture: uploadData.Location,
+      },
+    };
 
-    // check if there is a profile picture already set and delete it 
+    // check if there is a profile picture already set and delete it
     let queryResult = await collection.findOne(query);
     if (queryResult?.profilePicture) {
       let deleteParams = {
         Bucket: process.env.AWS_BUCKET_NAME,
-        Key: queryResult.profilePicture.split("/").pop()
-      }
+        Key: queryResult.profilePicture.split("/").pop(),
+      };
       s3.deleteObject(deleteParams, (err: any) => {
         if (err) {
-          console.log(err)
+          console.log(err);
           res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send({
-            message: "Unable to delete existing profile picture"
+            message: "Unable to delete existing profile picture",
           });
           return;
         }
-      })
+      });
     }
 
     // update database
     collection.updateOne(query, update);
 
     // send response
-    res.status(HttpStatusCode.OK).send(
-      {
-        message: "Profile picture updated successfully",
-        profilePicture: uploadData.Location
-      }
-    );
+    res.status(HttpStatusCode.OK).send({
+      message: "Profile picture updated successfully",
+      profilePicture: uploadData.Location,
+    });
   } catch (err) {
     console.log(err);
     res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send({
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
-
-}
+};
 
 const changeProfile = async (req: AuthenticatedRequest, res: Response) => {
   if (!req.body) {
@@ -243,10 +243,7 @@ const changeProfile = async (req: AuthenticatedRequest, res: Response) => {
   return;
 };
 
-const getProfile = async (
-  req: Request & { token?: string; token_data?: Record<any, any> },
-  res: Response
-) => {
+const getProfile = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const collection = (await db).db("sakugwej").collection("users");
     let query = { _id: new ObjectId(req.token_data?._id) };

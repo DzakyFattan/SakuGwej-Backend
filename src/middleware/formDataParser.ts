@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-var multer = require('multer');
+var multer = require("multer");
 var upload = multer();
 
 function formDataParser(req: Request, res: Response, next: Function) {

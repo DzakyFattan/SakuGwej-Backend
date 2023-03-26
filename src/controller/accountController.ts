@@ -7,13 +7,10 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const getAccounts = async (
-  req: Request & { token?: string; token_data?: Record<any, any> },
-  res: Response
-) => {
+const getAccounts = async (req: AuthenticatedRequest, res: Response) => {
   try {
     // check if user exists
-    const userId  = new ObjectId(req.token_data?._id);
+    const userId = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
     let query = { _id: userId };
     let user = await checkUser.findOne(query);
@@ -55,7 +52,7 @@ const addAccount = async (req: AuthenticatedRequest, res: Response) => {
   }
   try {
     // check if user exists
-    const _userId    = new ObjectId(req.token_data?._id);
+    const _userId = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
     let query = { _id: _userId };
     let user = await checkUser.findOne(query);
@@ -65,7 +62,7 @@ const addAccount = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
-    const collection  = (await db).db("sakugwej").collection("accounts");
+    const collection = (await db).db("sakugwej").collection("accounts");
     const addDocument = {
       userId: _userId,
       accountName: req.body.account_name,
@@ -92,7 +89,7 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
     return;
   }
   try {
-    const _userId   = new ObjectId(req.token_data?._id);
+    const _userId = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
     let query = { _id: _userId };
     let user = await checkUser.findOne(query);
@@ -127,7 +124,7 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
 
 const deleteAccount = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const _userId   = new ObjectId(req.token_data?._id);
+    const _userId = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
     let query = { _id: _userId };
     let user = await checkUser.findOne(query);
