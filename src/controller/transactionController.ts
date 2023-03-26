@@ -8,7 +8,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const getTransactions = async (
-  req: Request & { token?: string; token_data?: Record<any, any> },
+  req: AuthenticatedRequest,
   res: Response
 ) => {
   try {
