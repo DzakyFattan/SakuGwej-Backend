@@ -67,6 +67,7 @@ const addDebt = async (req: AuthenticatedRequest, res: Response) => {
       amount: req.body.amount,
       name: req.body.name,
       description: req.body.description,
+      startDate: req.body.startDate,
       dueDate: req.body.dueDate,
     };
     const addResult = await collection.insertOne(addDebt);
@@ -98,23 +99,10 @@ const updateDebt = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
-    const checkAccount = (await db).db("sakugwej").collection("accounts");
-    let query2 = {
-      user_id: new ObjectId(req.token_data?._id),
-      accountId: req.body.accountId,
-    };
-    let acc = await checkAccount.findOne(query2);
-    if (!acc) {
-      res.status(400).send({
-        message: "Account not found",
-      });
-      return;
-    }
     const collection = (await db).db("sakugwej").collection("debts");
     let filter = { userId: new ObjectId(req.token_data?._id) };
     const updateDocument = {
       $set: {
-        accountId: req.body.accountId,
         type: req.body.type,
         amount: req.body.amount,
         name: req.body.name,
@@ -143,18 +131,6 @@ const deleteDebt = async (req: AuthenticatedRequest, res: Response) => {
     if (!user) {
       res.status(400).send({
         message: "User not found",
-      });
-      return;
-    }
-    const checkAccount = (await db).db("sakugwej").collection("accounts");
-    let query2 = {
-      user_id: new ObjectId(req.token_data?._id),
-      accountId: req.body.accountId,
-    };
-    let acc = await checkAccount.findOne(query2);
-    if (!acc) {
-      res.status(400).send({
-        message: "Account not found",
       });
       return;
     }
