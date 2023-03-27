@@ -9,7 +9,7 @@ app.use((req: Request, res: Response) => {
   res.status(404).send({
     message: "Unexpected route",
   });
-})
+});
 
 app.listen(port, () => {
   console.log(`[Server]: I am running at https://localhost:${port}`);

@@ -10,10 +10,10 @@ dotenv.config();
 const getAccounts = async (req: AuthenticatedRequest, res: Response) => {
   try {
     // check if user exists
-    const _userId  = new ObjectId(req.token_data?._id);
+    const _userId = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    const filterUser = { 
-      _id: _userId 
+    const filterUser = {
+      _id: _userId,
     };
     let user = await checkUser.findOne(filterUser);
     if (!user) {
@@ -23,20 +23,20 @@ const getAccounts = async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
     const collection = (await db).db("sakugwej").collection("accounts");
-    const filterAccount = { 
-      userId: _userId 
+    const filterAccount = {
+      userId: _userId,
     };
-    const sortAccount = { 
-      accountName: 1 as SortDirection, 
-    }
-    const limitAccount = parseInt(req.query.limit as string) || 10
-    const skipAccount = parseInt(req.query.skip as string) || 0
-    
-    let cursor = collection.
-                  find(filterAccount).
-                  sort(sortAccount).
-                  limit(limitAccount).
-                  skip(skipAccount);
+    const sortAccount = {
+      accountName: 1 as SortDirection,
+    };
+    const limitAccount = parseInt(req.query.limit as string) || 10;
+    const skipAccount = parseInt(req.query.skip as string) || 0;
+
+    let cursor = collection
+      .find(filterAccount)
+      .sort(sortAccount)
+      .limit(limitAccount)
+      .skip(skipAccount);
     if ((await collection.countDocuments(filterAccount)) === 0) {
       res.status(400).send({
         message: "Account not found",
@@ -46,7 +46,7 @@ const getAccounts = async (req: AuthenticatedRequest, res: Response) => {
     let result = await cursor.toArray();
     res.status(200).send({
       message: "Account(s) found",
-      data: [ ...result ],
+      data: [...result],
     });
     return;
   } catch (err) {
@@ -79,9 +79,10 @@ const addAccount = async (req: AuthenticatedRequest, res: Response) => {
     const collection = (await db).db("sakugwej").collection("accounts");
     const addDocument = {
       userId: _userId,
-      accountName: req.body.account_name,
-      accountNumber: req.body.account_number,
-      accountDescription: req.body.account_description,
+      name: req.body.name,
+      number: req.body.number,
+      description: req.body.description,
+      amount: req.body.amount,
     };
     const addResult = await collection.insertOne(addDocument);
     res.status(HttpStatusCode.CREATED).send({
@@ -118,9 +119,10 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
     // update only the fields that are provided
     const updateDocument = {
       $set: {
-        accountName: req.body.accountName,
-        accountNumber: req.body.accountNumber,
-        accountDescription: req.body.account_description,
+        name: req.body.name,
+        number: req.body.number,
+        description: req.body.description,
+        amount: req.body.amount,
       },
     };
     const updResult = await collection.updateOne(filter, updateDocument);

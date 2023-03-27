@@ -11,8 +11,8 @@ const getTransactions = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const _userId = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    const filterUser = { 
-      _id: _userId 
+    const filterUser = {
+      _id: _userId,
     };
     let user = await checkUser.findOne(filterUser);
     if (!user) {
@@ -22,8 +22,8 @@ const getTransactions = async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
     const collection = (await db).db("sakugwej").collection("transactions");
-    const filterTransaction = { 
-      userId: _userId 
+    const filterTransaction = {
+      userId: _userId,
     };
     const sortTransaction = {
       createdAt: -1 as SortDirection,
@@ -31,46 +31,49 @@ const getTransactions = async (req: AuthenticatedRequest, res: Response) => {
     const skipTransaction = parseInt(req.query.skip as string) || 0;
     const limitTransaction = parseInt(req.query.limit as string) || 10;
 
-    let cursor = collection.
-                  find(filterTransaction).
-                  sort(sortTransaction).
-                  skip(skipTransaction).
-                  limit(limitTransaction);
+    let cursor = collection
+      .find(filterTransaction)
+      .sort(sortTransaction)
+      .skip(skipTransaction)
+      .limit(limitTransaction);
     if ((await collection.countDocuments(filterTransaction)) === 0) {
       res.status(400).send({
         message: "Transaction not found",
-        data: _userId
+        data: _userId,
       });
       return;
     }
     let rawResult = await cursor.toArray();
-    let utc = new Date().toLocaleDateString("en-US", {
-      timeZone: "Asia/Jakarta",
-    }).split("/");
+    let utc = new Date()
+      .toLocaleDateString("en-US", {
+        timeZone: "Asia/Jakarta",
+      })
+      .split("/");
     let localDate = `${utc[2]}-${utc[0]}-${utc[1]}`;
 
-    let result: { 
-      createdAt: string,  
-      notes: any 
+    let result: {
+      createdAt: string;
+      notes: any;
     }[] = [];
 
     rawResult.forEach((item) => {
-      let diff = new Date(localDate).getTime() - new Date(item.createdAt).getTime();
+      let diff =
+        new Date(localDate).getTime() - new Date(item.createdAt).getTime();
       let days = Math.floor(diff / (1000 * 60 * 60 * 24));
       let createdAt = item.createdAt;
 
-      delete item.createdAt
+      delete item.createdAt;
       result[days] = {
         createdAt,
-        notes: result[days]?.notes ? [...result[days].notes, item] : [item]
-      }
+        notes: result[days]?.notes ? [...result[days].notes, item] : [item],
+      };
     });
 
     result = result.filter((item) => item !== null);
 
     res.status(200).send({
       message: "Transaction(s) found",
-      data: [ ...result ],
+      data: [...result],
     });
     return;
   } catch (err) {
@@ -112,10 +115,10 @@ const addTransaction = async (req: AuthenticatedRequest, res: Response) => {
     const collection = (await db).db("sakugwej").collection("transactions");
     const addDocument = {
       userId: userId,
+      accountId: accountId,
       type: req.body.type,
       amount: req.body.amount,
       category: req.body.category,
-      accountId: accountId,
       description: req.body.description,
       createdAt: req.body.createdAt,
     };
@@ -201,7 +204,9 @@ const deleteTransaction = async (req: AuthenticatedRequest, res: Response) => {
     }
     const collection = (await db).db("sakugwej").collection("transactions");
     const _transactionId = new ObjectId(req.params.id);
-    let filterTransaction = _transactionId ?  { userId: _userId, _id: _transactionId } : { userId: _userId };
+    let filterTransaction = _transactionId
+      ? { userId: _userId, _id: _transactionId }
+      : { userId: _userId };
     const delResult = await collection.deleteOne(filterTransaction);
     res.status(200).send({
       message: "Transaction deleted successfully",

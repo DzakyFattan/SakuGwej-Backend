@@ -24,16 +24,19 @@
 ### POST: /api/v1/user/login
 
 #### Required (as JSON payload):
+
 - email
 - password
 
 #### Response:
+
 - 200 OK with JSON payload:
 
 ```json
 {
-  "message": "Login successfull",
-  "token": "{JWT}"
+  "message": "Login successful",
+  "token": "{JWT}",
+  "theme": "{theme}"
 }
 ```
 
@@ -96,7 +99,8 @@
     "birthDate": "{birthDate}",
     "email": "{email}",
     "gender": "{gender}",
-    "phoneNumber": "{phoneNumber}"
+    "phoneNumber": "{phoneNumber}",
+    "theme": "{theme}"
   }
 }
 ```
@@ -112,10 +116,12 @@
 ### POST: /api/v1/user/change-profile-picture
 
 #### Required:
+
 - JWT (as bearer token)
 - a single image file (from form-data, key is not important)
 
 #### Response:
+
 - 200 OK with JSON payload:
 
 ```json
@@ -124,6 +130,7 @@
   "profilePicture": "{profilePictureURL}"
 }
 ```
+
 - 4XX with JSON Payload:
 
 ```json
@@ -150,9 +157,10 @@
   "data": [
     {
       "userId": "{userId}",
-      "accountName": "{accountName}",
-      "accountNumber": "{accountNumber}",
-      "accountDescription": "{accountDescription}"
+      "name": "{accountName}",
+      "number": "{accountNumber}",
+      "description": "{accountDescription}",
+      "amount": "{amount}"
     },
     {
       /* ... */
@@ -174,9 +182,10 @@
 #### Required (as JSON payload):
 
 - userId
-- accountName
-- accountNumber
-- accountDescription
+- name
+- number
+- description
+- amount
 
 #### Response:
 
@@ -198,9 +207,10 @@
 #### Optional (as JSON payload):
 
 - userId
-- accountName
-- accountNumber
-- accountDescriptiom
+- name
+- number
+- description
+- amount
 
 #### Response:
 
@@ -262,7 +272,7 @@
   "data": [
     {
       "createdAt": "{createdAt}",
-      "notes" : [
+      "notes": [
         {
           "userId": "{userId}",
           "accountId": "{accountId}",
@@ -270,6 +280,7 @@
           "amount": "{amount}",
           "category": "{category}",
           "description": "{description}",
+          "createdAt": "{createdAt}"
         },
         {
           /* ... */

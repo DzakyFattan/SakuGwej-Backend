@@ -43,7 +43,13 @@ router.get("/", (_req: Request, res: Response) => {
 router.get("/test", logRequest, test);
 router.post("/user/register", logRequest, jsonParser, register);
 router.post("/user/login", logRequest, jsonParser, login);
-router.post("/user/change-profile", logRequest, jsonParser, verifyToken, changeProfile);
+router.post(
+  "/user/change-profile",
+  logRequest,
+  jsonParser,
+  verifyToken,
+  changeProfile
+);
 router.get("/user/profile", logRequest, verifyToken, getProfile);
 router.post(
   "/user/change-profile-picture",
@@ -59,15 +65,27 @@ router.patch("/accounts", logRequest, jsonParser, verifyToken, updateAccount);
 router.delete("/accounts", logRequest, jsonParser, verifyToken, deleteAccount);
 
 router.get("/transactions", logRequest, verifyToken, getTransactions);
-router.post("/transactions", logRequest, jsonParser, verifyToken, addTransaction);
-router.patch("/transactions", logRequest, jsonParser, verifyToken, updateTransaction);
-router.delete("/transactions", logRequest, jsonParser, verifyToken, deleteTransaction);
+router.post(
+  "/transactions",
+  logRequest,
+  jsonParser,
+  verifyToken,
+  addTransaction
+);
+router.patch(
+  "/transactions",
+  logRequest,
+  jsonParser,
+  verifyToken,
+  updateTransaction
+);
+// router.delete("/transactions", logRequest, jsonParser, verifyToken, deleteTransaction);
 router.delete("/transactions/:id", logRequest, verifyToken, deleteTransaction);
 
 router.get("/debts", logRequest, verifyToken, getDebts);
 router.post("/debts", logRequest, jsonParser, verifyToken, addDebt);
 router.patch("/debts", logRequest, jsonParser, verifyToken, updateDebt);
-router.delete("/debts", logRequest, jsonParser, verifyToken, deleteDebt);
+// router.delete("/debts", logRequest, jsonParser, verifyToken, deleteDebt);
 router.delete("/debts/:id", logRequest, verifyToken, deleteDebt);
 
 export { router };
