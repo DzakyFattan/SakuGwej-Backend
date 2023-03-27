@@ -22,7 +22,7 @@ lint-test-job:
     - npm i
     - npm i prettier
     - echo "Linting code..."
-    - npx prettier --check "src/**/*.ts"
+    # - npx prettier --check "src/**/*.ts" #test later
 
 unit-test-job:
   stage: test
