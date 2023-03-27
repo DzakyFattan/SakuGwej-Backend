@@ -3,6 +3,8 @@ import { AuthenticatedRequest } from "../../types/AuthenticatedRequest";
 import crypto from "crypto-js";
 import db from "../../utils/db";
 
+var themes = ["bochi_the_default", "bochi_the_dark", "bochi_the_light"];
+
 async function getUpdatedvalues(req: AuthenticatedRequest, res: Response) {
   const {
     newUsername,
@@ -11,6 +13,7 @@ async function getUpdatedvalues(req: AuthenticatedRequest, res: Response) {
     newBirthDate,
     newEmail,
     newPhoneNumber,
+    newTheme,
   } = req.body;
 
   let updates: Record<any, any> = {};
@@ -105,6 +108,17 @@ async function getUpdatedvalues(req: AuthenticatedRequest, res: Response) {
       return { data: null, success: 0 };
     }
     updates.phoneNumber = newPhoneNumber;
+  }
+
+  if (newTheme != undefined && newTheme != "") {
+    if (!themes.includes(newTheme)) {
+      res.status(400).send({
+        message: "Invalid theme",
+      });
+      return { data: null, success: 0 };
+    }
+
+    updates.theme = newTheme;
   }
 
   return { data: updates, success: 1 };
