@@ -256,8 +256,42 @@
 ```
 
 ## Transactions
+### GET: /api/v1/transactions?{query}
 
-### GET: /api/v1/transactions
+- query: 'limit={start}&skip={end}&until={until}' (optional)
+
+#### Required:
+
+- JWT (as bearer token)
+
+#### Response:
+
+- 200 OK with JSON Payload:
+
+```json
+{
+  "message": "Account",
+  "data": [
+      {
+        "userId": "{userId}",
+        "accountId": "{accountId}",
+        "type": "{type}",
+        "amount": "{amount}",
+        "category": "{category}",
+        "description": "{description}",
+        "createdAt": "{createdAt}"
+      },
+      {
+        /* ... */
+      } 
+  ]
+}
+```
+
+### GET: /api/v1/transactions/:interval?{query} 
+
+- interval: 'daily', 'weekly', 'monthly', 'yearly'
+- query: 'limit={start}&skip={end}&until={until}' (optional)
 
 #### Required:
 
@@ -280,7 +314,8 @@
           "type": "{type}",
           "amount": "{amount}",
           "category": "{category}",
-          "description": "{description}"
+          "description": "{description}",
+          "createdAt": "{createdAt}"
         },
         {
           /* ... */
@@ -386,7 +421,9 @@
 
 ## Debts
 
-### GET: /api/v1/debts
+### GET: /api/v1/debts?{query}
+
+- query: 'limit={start}&skip={end}&until={until}' (optional)
 
 #### Required:
 
