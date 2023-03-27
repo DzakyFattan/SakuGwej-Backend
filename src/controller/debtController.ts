@@ -21,9 +21,21 @@ const getDebts = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
+   
+    const utc = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      timeZone: "Asia/Jakarta",
+    })
+    const now = new Date(utc).toISOString();
+    const def = new Date(new Date(utc).getTime() + 30 * 24 * 60 * 60 * 1000);
+    const until = req.query.until ? new Date(req.query.until as string).toISOString() : def.toISOString();
+
     const collection = (await db).db("sakugwej").collection("debts");
     const filterDebt = {
       userId: _userId,
+      dueDate:  { $gte: new Date(now), $lte: new Date(until) },
     };
     const sortDebt = {
       dueDate: 1 as SortDirection,
@@ -41,7 +53,6 @@ const getDebts = async (req: AuthenticatedRequest, res: Response) => {
     if ((await collection.countDocuments(filterDebt)) === 0) {
       res.status(400).send({
         message: "Debt not found",
-        user: _userId,
       });
       return;
     }
@@ -82,8 +93,8 @@ const addDebt = async (req: AuthenticatedRequest, res: Response) => {
       amount: req.body.amount,
       name: req.body.name,
       description: req.body.description,
-      startDate: req.body.startDate,
-      dueDate: req.body.dueDate,
+      startDate: new Date(new Date(req.body.startDate).toDateString()),
+      dueDate: new Date(new Date(req.body.dueDate).toISOString()),
     };
     const addResult = await collection.insertOne(addDebt);
     res.status(HttpStatusCode.CREATED).send({

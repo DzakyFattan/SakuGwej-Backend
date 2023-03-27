@@ -65,6 +65,8 @@ router.patch("/accounts", logRequest, jsonParser, verifyToken, updateAccount);
 router.delete("/accounts", logRequest, jsonParser, verifyToken, deleteAccount);
 
 router.get("/transactions", logRequest, verifyToken, getTransactions);
+router.get("/transactions/:interval", logRequest, verifyToken, getTransactions);
+
 router.post(
   "/transactions",
   logRequest,
@@ -79,13 +81,15 @@ router.patch(
   verifyToken,
   updateTransaction
 );
-// router.delete("/transactions", logRequest, jsonParser, verifyToken, deleteTransaction);
+
+router.delete("/transactions", logRequest, jsonParser, verifyToken, deleteTransaction);
 router.delete("/transactions/:id", logRequest, verifyToken, deleteTransaction);
 
 router.get("/debts", logRequest, verifyToken, getDebts);
 router.post("/debts", logRequest, jsonParser, verifyToken, addDebt);
 router.patch("/debts", logRequest, jsonParser, verifyToken, updateDebt);
-// router.delete("/debts", logRequest, jsonParser, verifyToken, deleteDebt);
+// 
+router.delete("/debts", logRequest, jsonParser, verifyToken, deleteDebt);
 router.delete("/debts/:id", logRequest, verifyToken, deleteDebt);
 
 export { router };
