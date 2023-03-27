@@ -62,6 +62,7 @@
 - newBirthDate ('YYYY-MM-DD')
 - newEmail
 - newPhoneNumber
+- newTheme
 
 #### Response:
 
@@ -279,8 +280,7 @@
           "type": "{type}",
           "amount": "{amount}",
           "category": "{category}",
-          "description": "{description}",
-          "createdAt": "{createdAt}"
+          "description": "{description}"
         },
         {
           /* ... */
