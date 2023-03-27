@@ -28,7 +28,14 @@ const getTransactions = async (req: AuthenticatedRequest, res: Response) => {
     const sortTransaction = {
       createdAt: -1 as SortDirection,
     };
-    let cursor = collection.find(filterTransaction).sort(sortTransaction);
+    const skipTransaction = parseInt(req.query.skip as string) || 0;
+    const limitTransaction = parseInt(req.query.limit as string) || 10;
+
+    let cursor = collection.
+                  find(filterTransaction).
+                  sort(sortTransaction).
+                  skip(skipTransaction).
+                  limit(limitTransaction);
     if ((await collection.countDocuments(filterTransaction)) === 0) {
       res.status(400).send({
         message: "Transaction not found",
@@ -182,10 +189,10 @@ const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
 
 const deleteTransaction = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = new ObjectId(req.token_data?._id);
+    const _userId = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: userId };
-    let user = await checkUser.findOne(query);
+    let filterUser = { _id: _userId };
+    let user = await checkUser.findOne(filterUser);
     if (!user) {
       res.status(400).send({
         message: "User not found",
@@ -193,8 +200,9 @@ const deleteTransaction = async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
     const collection = (await db).db("sakugwej").collection("transactions");
-    let filter = { userId: new ObjectId(req.token_data?._id) };
-    const delResult = await collection.deleteOne(filter);
+    const _transactionId = new ObjectId(req.params.id);
+    let filterTransaction = _transactionId ?  { userId: _userId, _id: _transactionId } : { userId: _userId };
+    const delResult = await collection.deleteOne(filterTransaction);
     res.status(200).send({
       message: "Transaction deleted successfully",
     });
@@ -202,6 +210,7 @@ const deleteTransaction = async (req: AuthenticatedRequest, res: Response) => {
     console.log(err);
     res.status(500).send({
       message: "Internal server error",
+      _transactionId: req.query.id,
     });
   }
 };

@@ -29,7 +29,14 @@ const getAccounts = async (req: AuthenticatedRequest, res: Response) => {
     const sortAccount = { 
       accountName: 1 as SortDirection, 
     }
-    let cursor = collection.find(filterAccount).sort(sortAccount);
+    const limitAccount = parseInt(req.query.limit as string) || 10
+    const skipAccount = parseInt(req.query.skip as string) || 0
+    
+    let cursor = collection.
+                  find(filterAccount).
+                  sort(sortAccount).
+                  limit(limitAccount).
+                  skip(skipAccount);
     if ((await collection.countDocuments(filterAccount)) === 0) {
       res.status(400).send({
         message: "Account not found",

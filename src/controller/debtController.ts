@@ -30,7 +30,14 @@ const getDebts = async (req: AuthenticatedRequest, res: Response) => {
       name: 1 as SortDirection,
       nominal: -1 as SortDirection,
     };
-    let cursor = collection.find(filterDebt).sort(sortDebt);
+    const limitDebt = parseInt(req.query.limit as string) || 10;
+    const skipDebt = parseInt(req.query.skip as string) || 0;
+    
+    let cursor = collection.
+                  find(filterDebt).
+                  sort(sortDebt).
+                  limit(limitDebt).
+                  skip(skipDebt);
     if ((await collection.countDocuments(filterDebt)) === 0) {
       res.status(400).send({
         message: "Debt not found",
@@ -133,18 +140,22 @@ const updateDebt = async (req: AuthenticatedRequest, res: Response) => {
 
 const deleteDebt = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const _userId = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: new ObjectId(req.token_data?._id) };
-    let user = await checkUser.findOne(query);
+    let filterUser = { _id: _userId };
+    let user = await checkUser.findOne(filterUser);
     if (!user) {
       res.status(400).send({
         message: "User not found",
       });
       return;
     }
+
     const collection = (await db).db("sakugwej").collection("debts");
-    let filter = { userId: new ObjectId(req.token_data?._id) };
-    const delResult = await collection.deleteOne(filter);
+    const _debtId = new ObjectId(req.params.id);
+
+    let filterDebt = _debtId ? { _id: _debtId } : {  };
+    const delResult = await collection.deleteOne(filterDebt);
     res.status(200).send({
       message: "Debt deleted successfully",
     });
