@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { AuthenticatedRequest } from "../types/AuthenticatedRequest";
 import { HttpStatusCode } from "../types/HttpStatusCode";
 import db from "../utils/db";
-import { ObjectId } from "mongodb";
+import { ObjectId, SortDirection } from "mongodb";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -10,10 +10,12 @@ dotenv.config();
 const getAccounts = async (req: AuthenticatedRequest, res: Response) => {
   try {
     // check if user exists
-    const userId = new ObjectId(req.token_data?._id);
+    const _userId  = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: userId };
-    let user = await checkUser.findOne(query);
+    const filterUser = { 
+      _id: _userId 
+    };
+    let user = await checkUser.findOne(filterUser);
     if (!user) {
       res.status(400).send({
         message: "User not found",
@@ -21,9 +23,14 @@ const getAccounts = async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
     const collection = (await db).db("sakugwej").collection("accounts");
-    let query2 = { userId: userId };
-    let cursor = collection.find(query2);
-    if ((await collection.countDocuments(query2)) === 0) {
+    const filterAccount = { 
+      userId: _userId 
+    };
+    const sortAccount = { 
+      accountName: 1 as SortDirection, 
+    }
+    let cursor = collection.find(filterAccount).sort(sortAccount);
+    if ((await collection.countDocuments(filterAccount)) === 0) {
       res.status(400).send({
         message: "Account not found",
       });
@@ -32,7 +39,7 @@ const getAccounts = async (req: AuthenticatedRequest, res: Response) => {
     let result = await cursor.toArray();
     res.status(200).send({
       message: "Account(s) found",
-      data: { ...result, _id: undefined },
+      data: [ ...result ],
     });
     return;
   } catch (err) {

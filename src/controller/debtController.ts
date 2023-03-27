@@ -2,16 +2,19 @@ import { Request, Response } from "express";
 import { AuthenticatedRequest } from "../types/AuthenticatedRequest";
 import { HttpStatusCode } from "../types/HttpStatusCode";
 import db from "../utils/db";
-import { ObjectId } from "mongodb";
+import { ObjectId, SortDirection } from "mongodb";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const getDebts = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const _userId = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: new ObjectId(req.token_data?._id) };
-    let user = await checkUser.findOne(query);
+    let filterUser = { 
+      _id: _userId 
+    };
+    let user = await checkUser.findOne(filterUser);
     if (!user) {
       res.status(400).send({
         message: "User not found",
@@ -19,18 +22,26 @@ const getDebts = async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
     const collection = (await db).db("sakugwej").collection("debts");
-    let query2 = { userId: new ObjectId(req.token_data?._id) };
-    let cursor = collection.find(query2);
-    if ((await collection.countDocuments(query2)) === 0) {
+    const filterDebt = {
+      userId: _userId,
+    };
+    const sortDebt = {
+      dueDate: 1 as SortDirection,
+      name: 1 as SortDirection,
+      nominal: -1 as SortDirection,
+    };
+    let cursor = collection.find(filterDebt).sort(sortDebt);
+    if ((await collection.countDocuments(filterDebt)) === 0) {
       res.status(400).send({
         message: "Debt not found",
+        user: _userId,
       });
       return;
     }
     let result = await cursor.toArray();
     res.status(200).send({
       message: "Debt(s) found",
-      data: { ...result, _id: undefined },
+      data: [ ...result ],
     });
   } catch (err) {
     console.log(err);

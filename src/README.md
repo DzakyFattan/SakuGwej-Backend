@@ -216,13 +216,20 @@
   "message": "Account",
   "data": [
     {
-      "userId": "{userId}",
-      "accountId": "{accountId}",
-      "type": "{type}",
-      "amount": "{amount}",
-      "category": "{category}",
-      "description": "{description}",
-      "createdAt": "{createdAt}"
+      "createdAt": "{createdAt}",
+      "notes" : [
+        {
+          "userId": "{userId}",
+          "accountId": "{accountId}",
+          "type": "{type}",
+          "amount": "{amount}",
+          "category": "{category}",
+          "description": "{description}",
+        },
+        {
+          /* ... */
+        }
+      ]
     },
     {
       /* ... */
