@@ -103,7 +103,6 @@ const login = async (req: Request, res: Response) => {
     let token = jwt.sign(
       {
         _id: result._id,
-        theme: result.theme ? result.theme : "bochi_the_default",
       },
       process.env.JWT_SECRET!,
       { expiresIn: "7d" }
@@ -111,6 +110,7 @@ const login = async (req: Request, res: Response) => {
     res.send({
       message: "Login successful",
       token: token,
+      theme: result.theme ? result.theme : "bochi_the_default",
     });
   } catch (err) {
     console.log(err);
