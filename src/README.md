@@ -23,6 +23,28 @@
 
 ### POST: /api/v1/user/login
 
+#### Required (as JSON payload):
+- email
+- password
+
+#### Response:
+- 200 OK with JSON payload:
+
+```json
+{
+  "message": "Login successfull",
+  "token": "{JWT}"
+}
+```
+
+- 4XX with JSON Payload:
+
+```json
+{
+  "message": "{Error message}"
+}
+```
+
 ### POST: /api/v1/user/change-profile
 
 #### Required:
@@ -80,6 +102,29 @@
 ```
 
 - 4xx with JSON Payload:
+
+```json
+{
+  "message": "{Error message}"
+}
+```
+
+### POST: /api/v1/user/change-profile-picture
+
+#### Required:
+- JWT (as bearer token)
+- a single image file (from form-data, key is not important)
+
+#### Response:
+- 200 OK with JSON payload:
+
+```json
+{
+  "message": "Profile picture updated successfully",
+  "profilePicture": "{profilePictureURL}"
+}
+```
+- 4XX with JSON Payload:
 
 ```json
 {
