@@ -62,10 +62,12 @@ router.get("/transactions", logRequest, verifyToken, getTransactions);
 router.post("/transactions", logRequest, jsonParser, verifyToken, addTransaction);
 router.patch("/transactions", logRequest, jsonParser, verifyToken, updateTransaction);
 router.delete("/transactions", logRequest, jsonParser, verifyToken, deleteTransaction);
+router.delete("/transactions/:id", logRequest, verifyToken, deleteTransaction);
 
 router.get("/debts", logRequest, verifyToken, getDebts);
 router.post("/debts", logRequest, jsonParser, verifyToken, addDebt);
 router.patch("/debts", logRequest, jsonParser, verifyToken, updateDebt);
 router.delete("/debts", logRequest, jsonParser, verifyToken, deleteDebt);
+router.delete("/debts/:id", logRequest, verifyToken, deleteDebt);
 
 export { router };
