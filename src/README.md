@@ -62,6 +62,7 @@
 - newBirthDate ('YYYY-MM-DD')
 - newEmail
 - newPhoneNumber
+- newTheme
 
 #### Response:
 
