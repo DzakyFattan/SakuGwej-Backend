@@ -279,8 +279,7 @@
           "type": "{type}",
           "amount": "{amount}",
           "category": "{category}",
-          "description": "{description}",
-          "createdAt": "{createdAt}"
+          "description": "{description}"
         },
         {
           /* ... */
