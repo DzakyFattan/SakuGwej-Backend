@@ -333,7 +333,11 @@ limit={start}&skip={end}&until={until}
           "accountId": "{accountId}",
           "type": "{type}",
           "amount": "{amount}",
-          "category": "{category}",
+          "category": 
+          {
+            "name": "{name}",
+            "image": "{image}"
+          },
           "description": "{description}",
           "createdAt": "{createdAt}"
         },
