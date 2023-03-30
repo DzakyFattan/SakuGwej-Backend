@@ -9,9 +9,39 @@ dotenv.config();
 
 const getInfo = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const _userId = new ObjectId(req.token_data?._id);
+    const checkUser = (await db).db("sakugwej").collection("users");
+    const filterUser = { _id: _userId };
+    let user = await checkUser.findOne(filterUser);
+    if (!user) {
+      res.status(400).send({
+        message: "User not found",
+      });
+      return;
+    }
+
+    const collection = (await db).db("sakugwej").collection("accounts");
+    const filterAccount = {
+      userId: _userId,
+      priority: { $exists: true, $ne: null },
+    };
+    const sortAccount = {
+      priority: 1 as SortDirection,
+    };
+
+    let cursor = collection.find(filterAccount).sort(sortAccount);
+    if ((await collection.countDocuments(filterAccount)) === 0) {
+      res.status(400).send({
+        message: "No Data",
+      });
+      return;
+    }
+    let result = await cursor.toArray();
     res.status(200).send({
-      message: "Fetched",
-      data: {},
+      message: "Fetched Successfully",
+      data: {
+        accounts: [...result],
+      },
     });
   } catch (err) {
     console.log(err);
