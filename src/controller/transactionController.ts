@@ -132,7 +132,7 @@ const addTransaction = async (req: AuthenticatedRequest, res: Response) => {
       userId: _userId,
       accountId: accountId,
       type: req.body.type,
-      amount: req.body.amount,
+      amount: parseFloat(req.body.amount),
       category: req.body.category,
       description: req.body.description,
       createdAt: new Date(new Date(req.body.createdAt).toISOString()),
@@ -187,7 +187,7 @@ const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
       $set: {
         accountId: accountId,
         type: req.body.type,
-        amount: req.body.amount,
+        amount: parseFloat(req.body.amount),
         category: req.body.category,
         description: req.body.description,
         createdAt: req.body.date,

@@ -93,7 +93,7 @@ const addDebt = async (req: AuthenticatedRequest, res: Response) => {
     const addDebt = {
       userId: new ObjectId(req.token_data?._id),
       type: req.body.type,
-      amount: req.body.amount,
+      amount: parseFloat(req.body.amount),
       name: req.body.name,
       description: req.body.description,
       startDate: new Date(new Date(req.body.startDate).toDateString()),
@@ -135,7 +135,7 @@ const updateDebt = async (req: AuthenticatedRequest, res: Response) => {
     const updateDocument = {
       $set: {
         type: req.body.type,
-        amount: req.body.amount,
+        amount: parseFloat(req.body.amount),
         name: req.body.name,
         description: req.body.description,
         startDate: req.body.startDate,

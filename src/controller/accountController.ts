@@ -82,8 +82,8 @@ const addAccount = async (req: AuthenticatedRequest, res: Response) => {
       name: req.body.name,
       number: req.body.number,
       description: req.body.description,
-      amount: req.body.amount,
-      priority: req.body.priority || 0,
+      amount: parseFloat(req.body.amount),
+      priority: parseInt(req.body.priority) || 0,
     };
     const addResult = await collection.insertOne(addDocument);
     res.status(HttpStatusCode.CREATED).send({
@@ -124,8 +124,8 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
         name: req.body.name,
         number: req.body.number,
         description: req.body.description,
-        amount: req.body.amount,
-        priority: req.body.priority,
+        amount: parseFloat(req.body.amount),
+        priority: parseInt(req.body.priority),
       },
     };
     const updResult = await collection.updateOne(filter, updateDocument);
