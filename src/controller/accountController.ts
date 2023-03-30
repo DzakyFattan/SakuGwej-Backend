@@ -27,6 +27,7 @@ const getAccounts = async (req: AuthenticatedRequest, res: Response) => {
       userId: _userId,
     };
     const sortAccount = {
+      priority: -1 as SortDirection,
       name: 1 as SortDirection,
     };
     const limitAccount = parseInt(req.query.limit as string) || 10;
@@ -81,9 +82,10 @@ const addAccount = async (req: AuthenticatedRequest, res: Response) => {
       userId: _userId,
       name: req.body.name,
       number: req.body.number,
-      description: req.body.description,
       amount: parseFloat(req.body.amount),
-      priority: parseInt(req.body.priority) || 0,
+      description: req.body.description,
+      image: req.body.image,
+      priority: parseInt(req.body.priority) || -1,
     };
     const addResult = await collection.insertOne(addDocument);
     res.status(HttpStatusCode.CREATED).send({
@@ -123,8 +125,9 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
       $set: {
         name: req.body.name,
         number: req.body.number,
-        description: req.body.description,
         amount: parseFloat(req.body.amount),
+        description: req.body.description,
+        gambar: req.body.gambar,
         priority: parseInt(req.body.priority),
       },
     };

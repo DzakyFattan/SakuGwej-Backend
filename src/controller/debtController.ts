@@ -2,7 +2,7 @@ import { Response } from "express";
 import { AuthenticatedRequest } from "../types/AuthenticatedRequest";
 import { HttpStatusCode } from "../types/HttpStatusCode";
 import db from "../utils/db";
-import { ObjectId, SortDirection } from "mongodb";
+import { ObjectId, SortDirection  } from "mongodb";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -96,8 +96,8 @@ const addDebt = async (req: AuthenticatedRequest, res: Response) => {
       amount: parseFloat(req.body.amount),
       name: req.body.name,
       description: req.body.description,
-      startDate: new Date(new Date(req.body.startDate).toDateString()),
-      dueDate: new Date(new Date(req.body.dueDate).toISOString()),
+      startDate: new Date(req.body.startDate),
+      dueDate: new Date(req.body.dueDate)
     };
     const addResult = await collection.insertOne(addDebt);
     res.status(HttpStatusCode.CREATED).send({
@@ -107,6 +107,7 @@ const addDebt = async (req: AuthenticatedRequest, res: Response) => {
     console.log(err);
     res.status(500).send({
       message: "Internal server error",
+      err: (new Date(req.body.dueDate))
     });
   }
 };
