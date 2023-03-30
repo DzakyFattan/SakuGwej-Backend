@@ -27,7 +27,7 @@ const getAccounts = async (req: AuthenticatedRequest, res: Response) => {
       userId: _userId,
     };
     const sortAccount = {
-      accountName: 1 as SortDirection,
+      name: 1 as SortDirection,
     };
     const limitAccount = parseInt(req.query.limit as string) || 10;
     const skipAccount = parseInt(req.query.skip as string) || 0;
@@ -83,6 +83,7 @@ const addAccount = async (req: AuthenticatedRequest, res: Response) => {
       number: req.body.number,
       description: req.body.description,
       amount: req.body.amount,
+      priority: req.body.priority || 0,
     };
     const addResult = await collection.insertOne(addDocument);
     res.status(HttpStatusCode.CREATED).send({
@@ -123,6 +124,7 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
         number: req.body.number,
         description: req.body.description,
         amount: req.body.amount,
+        priority: req.body.priority,
       },
     };
     const updResult = await collection.updateOne(filter, updateDocument);

@@ -21,16 +21,18 @@ const getTransactions = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
-    
+
     const utc = new Date().toLocaleDateString("en-US", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
       timeZone: "Asia/Jakarta",
-    })
+    });
     const now = new Date(utc).toISOString();
     const def = new Date(new Date(utc).getTime() - 30 * 24 * 60 * 60 * 1000);
-    const until = req.query.until ? new Date(req.query.until as string).toISOString() : def.toISOString();
+    const until = req.query.until
+      ? new Date(req.query.until as string).toISOString()
+      : def.toISOString();
 
     const collection = (await db).db("sakugwej").collection("transactions");
     const filterTransaction = {
@@ -58,29 +60,32 @@ const getTransactions = async (req: AuthenticatedRequest, res: Response) => {
     let result: any;
 
     if (req.params.interval === "daily") {
-      let utc = new Date().toLocaleDateString("en-US", {
-        timeZone: "Asia/Jakarta",
-      }).split("/");
+      let utc = new Date()
+        .toLocaleDateString("en-US", {
+          timeZone: "Asia/Jakarta",
+        })
+        .split("/");
       let localDate = `${utc[2]}-${utc[0]}-${utc[1]}`;
 
       result = [];
       rawResult.forEach((item) => {
-        let diff = new Date(localDate).getTime() - new Date(item.createdAt).getTime();
+        let diff =
+          new Date(localDate).getTime() - new Date(item.createdAt).getTime();
         let days = Math.floor(diff / (1000 * 60 * 60 * 24));
         let createdAt = item.createdAt;
-  
-        delete item.createdAt
+
+        delete item.createdAt;
         result[days] = {
           createdAt,
-          notes: result[days]?.notes ? [...result[days].notes, item] : [item]
-        }
+          notes: result[days]?.notes ? [...result[days].notes, item] : [item],
+        };
       });
-  
+
       result = result.filter((item: null) => item !== null);
     } else {
       result = rawResult;
     }
- 
+
     res.status(200).send({
       message: "Transaction(s) found",
       data: [...result],

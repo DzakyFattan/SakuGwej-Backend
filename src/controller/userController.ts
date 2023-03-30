@@ -255,7 +255,13 @@ const getProfile = async (req: AuthenticatedRequest, res: Response) => {
     }
     res.status(200).send({
       message: "success",
-      data: { ...result, _id: undefined, password: undefined, salt: undefined, theme: undefined },
+      data: {
+        ...result,
+        _id: undefined,
+        password: undefined,
+        salt: undefined,
+        theme: undefined,
+      },
     });
     return;
   } catch (err) {

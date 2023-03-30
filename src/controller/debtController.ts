@@ -21,26 +21,28 @@ const getDebts = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
-   
+
     const utc = new Date().toLocaleDateString("en-US", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
       timeZone: "Asia/Jakarta",
-    })
+    });
     const now = new Date(utc).toISOString();
     const def = new Date(new Date(utc).getTime() + 30 * 24 * 60 * 60 * 1000);
-    const until = req.query.until ? new Date(req.query.until as string).toISOString() : def.toISOString();
+    const until = req.query.until
+      ? new Date(req.query.until as string).toISOString()
+      : def.toISOString();
 
     const collection = (await db).db("sakugwej").collection("debts");
     const filterDebt = {
       userId: _userId,
-      dueDate:  { $gte: new Date(now), $lte: new Date(until) },
+      dueDate: { $gte: new Date(now), $lte: new Date(until) },
     };
     const sortDebt = {
       dueDate: 1 as SortDirection,
       name: 1 as SortDirection,
-      nominal: -1 as SortDirection,
+      amount: -1 as SortDirection,
     };
     const limitDebt = parseInt(req.query.limit as string) || 10;
     const skipDebt = parseInt(req.query.skip as string) || 0;

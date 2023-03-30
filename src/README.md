@@ -142,7 +142,13 @@
 
 ## Accounts
 
-### GET: /api/v1/accounts
+### GET: /api/v1/accounts?{query}
+
+#### Query (optional)
+
+```
+limit={start}&skip={end}&until={until}
+```
 
 #### Required:
 
@@ -161,7 +167,8 @@
       "name": "{accountName}",
       "number": "{accountNumber}",
       "description": "{accountDescription}",
-      "amount": "{amount}"
+      "amount": "{amount}",
+      "priority": "{priority}"
     },
     {
       /* ... */
@@ -187,6 +194,7 @@
 - number
 - description
 - amount
+- priority (optional, default: 0)
 
 #### Response:
 
@@ -212,6 +220,7 @@
 - number
 - description
 - amount
+- priority
 
 #### Response:
 
@@ -256,9 +265,14 @@
 ```
 
 ## Transactions
+
 ### GET: /api/v1/transactions?{query}
 
-- query: 'limit={start}&skip={end}&until={until}' (optional)
+#### Query (optional)
+
+```
+limit={start}&skip={end}&until={until}
+```
 
 #### Required:
 
@@ -272,23 +286,23 @@
 {
   "message": "Account",
   "data": [
-      {
-        "userId": "{userId}",
-        "accountId": "{accountId}",
-        "type": "{type}",
-        "amount": "{amount}",
-        "category": "{category}",
-        "description": "{description}",
-        "createdAt": "{createdAt}"
-      },
-      {
-        /* ... */
-      } 
+    {
+      "userId": "{userId}",
+      "accountId": "{accountId}",
+      "type": "{type}",
+      "amount": "{amount}",
+      "category": "{category}",
+      "description": "{description}",
+      "createdAt": "{createdAt}"
+    },
+    {
+      /* ... */
+    }
   ]
 }
 ```
 
-### GET: /api/v1/transactions/:interval?{query} 
+### GET: /api/v1/transactions/:interval?{query}
 
 - interval: 'daily', 'weekly', 'monthly', 'yearly'
 - query: 'limit={start}&skip={end}&until={until}' (optional)
@@ -423,7 +437,11 @@
 
 ### GET: /api/v1/debts?{query}
 
-- query: 'limit={start}&skip={end}&until={until}' (optional)
+#### Query (optional)
+
+```
+limit={start}&skip={end}&until={until}
+```
 
 #### Required:
 
