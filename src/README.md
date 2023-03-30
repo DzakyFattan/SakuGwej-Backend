@@ -562,3 +562,9 @@ limit={start}&skip={end}&until={until}
   "message": "{Error message}"
 }
 ```
+
+## Dashboard
+
+### GET: /api/v1/dashboard
+
+### PATCH: /api/v1/dashboard
