@@ -1,4 +1,4 @@
-import { Express, Request, Response, Router } from "express";
+import { Request, Response, Router } from "express";
 import {
   register,
   login,
@@ -62,8 +62,20 @@ router.post(
 
 router.get("/accounts", logRequest, verifyToken, getAccounts);
 router.post("/accounts", logRequest, jsonParser, verifyToken, addAccount);
-router.patch("/accounts", logRequest, jsonParser, verifyToken, updateAccount);
-router.delete("/accounts", logRequest, jsonParser, verifyToken, deleteAccount);
+router.patch(
+  "/accounts/:id",
+  logRequest,
+  jsonParser,
+  verifyToken,
+  updateAccount
+);
+router.delete(
+  "/accounts/:id",
+  logRequest,
+  jsonParser,
+  verifyToken,
+  deleteAccount
+);
 
 router.get("/transactions", logRequest, verifyToken, getTransactions);
 router.get("/transactions/:interval", logRequest, verifyToken, getTransactions);
@@ -76,27 +88,27 @@ router.post(
   addTransaction
 );
 router.patch(
-  "/transactions",
+  "/transactions/:id",
   logRequest,
   jsonParser,
   verifyToken,
   updateTransaction
 );
 
-router.delete(
-  "/transactions",
-  logRequest,
-  jsonParser,
-  verifyToken,
-  deleteTransaction
-);
+// router.delete(
+//   "/transactions",
+//   logRequest,
+//   jsonParser,
+//   verifyToken,
+//   deleteTransaction
+// );
 router.delete("/transactions/:id", logRequest, verifyToken, deleteTransaction);
 
 router.get("/debts", logRequest, verifyToken, getDebts);
 router.post("/debts", logRequest, jsonParser, verifyToken, addDebt);
-router.patch("/debts", logRequest, jsonParser, verifyToken, updateDebt);
+router.patch("/debts/:id", logRequest, jsonParser, verifyToken, updateDebt);
 
-router.delete("/debts", logRequest, jsonParser, verifyToken, deleteDebt);
+// router.delete("/debts", logRequest, jsonParser, verifyToken, deleteDebt);
 router.delete("/debts/:id", logRequest, verifyToken, deleteDebt);
 
 router.get("/dashboard", logRequest, verifyToken, getInfo);

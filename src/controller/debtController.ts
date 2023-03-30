@@ -79,8 +79,9 @@ const addDebt = async (req: AuthenticatedRequest, res: Response) => {
     return;
   }
   try {
+    const _userId = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: new ObjectId(req.token_data?._id) };
+    let query = { _id: _userId };
     let user = await checkUser.findOne(query);
     if (!user) {
       res.status(400).send({
@@ -118,8 +119,9 @@ const updateDebt = async (req: AuthenticatedRequest, res: Response) => {
     return;
   }
   try {
+    const _userId = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: new ObjectId(req.token_data?._id) };
+    let query = { _id: _userId };
     let user = await checkUser.findOne(query);
     if (!user) {
       res.status(400).send({
@@ -127,8 +129,9 @@ const updateDebt = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
+    const _debtId = new ObjectId(req.params.id);
     const collection = (await db).db("sakugwej").collection("debts");
-    let filter = { userId: new ObjectId(req.token_data?._id) };
+    let filter = { userId: _userId, _id: _debtId };
     const updateDocument = {
       $set: {
         type: req.body.type,

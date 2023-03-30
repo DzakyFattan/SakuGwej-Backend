@@ -115,8 +115,9 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
+    const _accountId = new ObjectId(req.params.id);
     const collection = (await db).db("sakugwej").collection("accounts");
-    let filter = { userId: _userId };
+    let filter = { userId: _userId, _id: _accountId };
     // update only the fields that are provided
     const updateDocument = {
       $set: {
@@ -152,8 +153,9 @@ const deleteAccount = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
+    const _accountId = new ObjectId(req.params.id);
     const collection = (await db).db("sakugwej").collection("accounts");
-    let filter = { userId: _userId };
+    let filter = { userId: _userId, _id: _accountId };
     const delResult = await collection.deleteOne(filter);
     res.status(200).send({
       message: "Account deleted successfully",

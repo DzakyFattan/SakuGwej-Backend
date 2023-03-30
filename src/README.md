@@ -207,11 +207,12 @@ limit={start}&skip={end}&until={until}
 }
 ```
 
-### PATCH: /api/v1/accounts
+### PATCH: /api/v1/accounts/:id
 
 #### Required:
 
 - JWT (as bearer token)
+- accountId (as request param)
 
 #### Optional (as JSON payload):
 
@@ -240,11 +241,12 @@ limit={start}&skip={end}&until={until}
 }
 ```
 
-### DELETE: /api/v1/accounts
+### DELETE: /api/v1/accounts/:id
 
 #### Required:
 
 - JWT (as bearer token)
+- accountId (as request param)
 
 #### Response:
 
@@ -375,11 +377,12 @@ limit={start}&skip={end}&until={until}
 }
 ```
 
-### PATCH: /api/v1/transactions
+### PATCH: /api/v1/transactions/:id
 
 #### Required:
 
 - JWT (as bearer token)
+- transactionId (as request param)
 
 #### Optional (as JSON payload):
 
@@ -409,11 +412,12 @@ limit={start}&skip={end}&until={until}
 }
 ```
 
-### DELETE: /api/v1/transactions
+### DELETE: /api/v1/transactions/:id
 
 #### Required:
 
 - JWT (as bearer token)
+- transactionId (as request param)
 
 #### Response:
 
@@ -504,11 +508,12 @@ limit={start}&skip={end}&until={until}
 }
 ```
 
-### PATCH: /api/v1/debts
+### PATCH: /api/v1/debts/:id
 
 #### Required:
 
 - JWT (as bearer token)
+- debtId (as request param)
 
 #### Optional (as JSON payload):
 
@@ -539,11 +544,12 @@ limit={start}&skip={end}&until={until}
 }
 ```
 
-### DELETE: /api/v1/debts
+### DELETE: /api/v1/debts/:id
 
 #### Required:
 
 - JWT (as bearer token)
+- debtId (as request param)
 
 #### Response:
 
@@ -566,5 +572,28 @@ limit={start}&skip={end}&until={until}
 ## Dashboard
 
 ### GET: /api/v1/dashboard
+
+#### Required:
+
+- JWT (as bearer token)
+
+#### Response:
+
+- 200 OK with JSON Payload:
+
+```json
+{
+  "message": "Fetch dashboard data successfully",
+  "data": []
+}
+```
+
+- 4xx with JSON Payload:
+
+```json
+{
+  "message": "{Error message}"
+}
+```
 
 ### PATCH: /api/v1/dashboard
