@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { AuthenticatedRequest } from "../types/AuthenticatedRequest";
 import { HttpStatusCode } from "../types/HttpStatusCode";
 import db from "../utils/db";
@@ -27,7 +27,8 @@ const getAccounts = async (req: AuthenticatedRequest, res: Response) => {
       userId: _userId,
     };
     const sortAccount = {
-      accountName: 1 as SortDirection,
+      priority: -1 as SortDirection,
+      name: 1 as SortDirection,
     };
     const limitAccount = parseInt(req.query.limit as string) || 10;
     const skipAccount = parseInt(req.query.skip as string) || 0;
@@ -81,8 +82,10 @@ const addAccount = async (req: AuthenticatedRequest, res: Response) => {
       userId: _userId,
       name: req.body.name,
       number: req.body.number,
+      amount: parseFloat(req.body.amount),
       description: req.body.description,
-      amount: req.body.amount,
+      image: req.body.image,
+      priority: parseInt(req.body.priority) || -1,
     };
     const addResult = await collection.insertOne(addDocument);
     res.status(HttpStatusCode.CREATED).send({
@@ -114,15 +117,18 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
+    const _accountId = new ObjectId(req.params.id);
     const collection = (await db).db("sakugwej").collection("accounts");
-    let filter = { userId: _userId };
+    let filter = { userId: _userId, _id: _accountId };
     // update only the fields that are provided
     const updateDocument = {
       $set: {
         name: req.body.name,
         number: req.body.number,
+        amount: parseFloat(req.body.amount),
         description: req.body.description,
-        amount: req.body.amount,
+        gambar: req.body.gambar,
+        priority: parseInt(req.body.priority),
       },
     };
     const updResult = await collection.updateOne(filter, updateDocument);
@@ -150,8 +156,9 @@ const deleteAccount = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
+    const _accountId = new ObjectId(req.params.id);
     const collection = (await db).db("sakugwej").collection("accounts");
-    let filter = { userId: _userId };
+    let filter = { userId: _userId, _id: _accountId };
     const delResult = await collection.deleteOne(filter);
     res.status(200).send({
       message: "Account deleted successfully",

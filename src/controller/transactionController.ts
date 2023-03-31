@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { AuthenticatedRequest } from "../types/AuthenticatedRequest";
 import { HttpStatusCode } from "../types/HttpStatusCode";
 import db from "../utils/db";
@@ -21,16 +21,16 @@ const getTransactions = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
-    
+
     const utc = new Date().toLocaleDateString("en-US", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
       timeZone: "Asia/Jakarta",
-    })
-    const now = new Date(utc).toISOString();
-    const def = new Date(new Date(utc).getTime() - 30 * 24 * 60 * 60 * 1000);
-    const until = req.query.until ? new Date(req.query.until as string).toISOString() : def.toISOString();
+    }).split("/");
+    const now = `${utc[2]}-${utc[0]}-${utc[1]}`;
+    const def = new Date(now).getTime() - 30 * 24 * 60 * 60 * 1000;
+    const until = req.query.until ? req.query.until as string : def
 
     const collection = (await db).db("sakugwej").collection("transactions");
     const filterTransaction = {
@@ -58,29 +58,32 @@ const getTransactions = async (req: AuthenticatedRequest, res: Response) => {
     let result: any;
 
     if (req.params.interval === "daily") {
-      let utc = new Date().toLocaleDateString("en-US", {
-        timeZone: "Asia/Jakarta",
-      }).split("/");
+      let utc = new Date()
+        .toLocaleDateString("en-US", {
+          timeZone: "Asia/Jakarta",
+        })
+        .split("/");
       let localDate = `${utc[2]}-${utc[0]}-${utc[1]}`;
 
       result = [];
       rawResult.forEach((item) => {
-        let diff = new Date(localDate).getTime() - new Date(item.createdAt).getTime();
+        let diff =
+          new Date(localDate).getTime() - new Date(item.createdAt).getTime();
         let days = Math.floor(diff / (1000 * 60 * 60 * 24));
         let createdAt = item.createdAt;
-  
-        delete item.createdAt
+
+        delete item.createdAt;
         result[days] = {
           createdAt,
-          notes: result[days]?.notes ? [...result[days].notes, item] : [item]
-        }
+          notes: result[days]?.notes ? [...result[days].notes, item] : [item],
+        };
       });
-  
+
       result = result.filter((item: null) => item !== null);
     } else {
       result = rawResult;
     }
- 
+
     res.status(200).send({
       message: "Transaction(s) found",
       data: [...result],
@@ -102,10 +105,10 @@ const addTransaction = async (req: AuthenticatedRequest, res: Response) => {
     return;
   }
   try {
-    const userId = new ObjectId(req.token_data?._id);
+    const _userId = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: userId };
-    let user = await checkUser.findOne(query);
+    let filterUser = { _id: _userId };
+    let user = await checkUser.findOne(filterUser);
     if (!user) {
       res.status(400).send({
         message: "User not found",
@@ -114,23 +117,37 @@ const addTransaction = async (req: AuthenticatedRequest, res: Response) => {
     }
     const accountId = new ObjectId(req.body.accountId);
     const checkAccount = (await db).db("sakugwej").collection("accounts");
-    let query2 = { _id: accountId, userId: userId };
-    let acc = await checkAccount.findOne(query2);
+    let filterAccount = { _id: accountId, userId: _userId };
+    let acc = await checkAccount.findOne(filterAccount);
     if (!acc) {
       res.status(400).send({
         message: "Account not found",
       });
       return;
     }
-    const collection = (await db).db("sakugwej").collection("transactions");
+    const updateAccount = (await db).db("sakugwej").collection("accounts");
+    let updateFilter = { _id: accountId, userId: _userId };
+    let updateValue = {
+      $inc: {
+        amount: req.body.type === "credit" ? parseFloat(req.body.amount) : -parseFloat(req.body.amount),
+      },
+    };
+    let updateRes = await updateAccount.updateOne(updateFilter, updateValue);
+    if (!updateRes) {
+      res.status(400).send({
+        message: "Account not found",
+      });
+      return;
+    }
+        const collection = (await db).db("sakugwej").collection("transactions");
     const addDocument = {
-      userId: userId,
-      accountId: accountId,
+      userId: _userId,
       type: req.body.type,
-      amount: req.body.amount,
+      amount: parseFloat(req.body.amount),
       category: req.body.category,
+      accountId: accountId,
       description: req.body.description,
-      createdAt: new Date(new Date(req.body.createdAt).toISOString()),
+      createdAt: new Date(req.body.createdAt),
     };
     const addResult = await collection.insertOne(addDocument);
     res.status(HttpStatusCode.CREATED).send({
@@ -152,9 +169,9 @@ const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
     return;
   }
   try {
-    const userId = new ObjectId(req.token_data?._id);
+    const _userId = new ObjectId(req.token_data?._id);
     const checkUser = (await db).db("sakugwej").collection("users");
-    let query = { _id: userId };
+    let query = { _id: _userId };
     let user = await checkUser.findOne(query);
     if (!user) {
       res.status(400).send({
@@ -165,7 +182,7 @@ const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
     const accountId = new ObjectId(req.body.accountId);
     const checkAccount = (await db).db("sakugwej").collection("accounts");
     let query2 = {
-      userId: userId,
+      userId: _userId,
       accountId: accountId,
     };
     let acc = await checkAccount.findOne(query2);
@@ -175,19 +192,26 @@ const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
+    const _transactionId = new ObjectId(req.params.id);
     const collection = (await db).db("sakugwej").collection("transactions");
-    let filter = { userId: new ObjectId(req.token_data?._id) };
+    let filter = { userId: _userId, _id: _transactionId };
     const updateDocument = {
       $set: {
-        accountId: accountId,
         type: req.body.type,
-        amount: req.body.amount,
+        amount: parseFloat(req.body.amount),
         category: req.body.category,
+        accountId: accountId,
         description: req.body.description,
-        createdAt: req.body.date,
+        createdAt: new Date(req.body.createdAt),
       },
     };
     const updResult = await collection.updateOne(filter, updateDocument);
+    if (!updResult) {
+      res.status(400).send({
+        message: "Transaction not found",
+      });
+      return;
+    }
     res.status(200).send({
       message: "Transaction updated successfully",
     });
@@ -215,9 +239,42 @@ const deleteTransaction = async (req: AuthenticatedRequest, res: Response) => {
     const collection = (await db).db("sakugwej").collection("transactions");
     const _transactionId = new ObjectId(req.params.id);
     let filterTransaction = _transactionId
-      ? { userId: _userId, _id: _transactionId }
-      : { userId: _userId };
+    ? { userId: _userId, _id: _transactionId }
+    : { userId: _userId };
+    const transactions = await collection.find(filterTransaction).toArray();
+    if (!transactions) {
+      res.status(400).send({
+        message: "Transaction not found",
+      });
+      return;
+    }
+    transactions.forEach(async (transaction) => {
+      const accountId = new ObjectId(transaction.accountId);
+      const updateAccount = (await db).db("sakugwej").collection("accounts");
+
+      const filterAccount = { _id: accountId, userId: _userId };
+      const updateValue = {
+        $inc: {amount: transaction.type === "credit"? -parseFloat(transaction.amount) : parseFloat(transaction.amount),
+        },
+      };
+
+      const updateRes = await updateAccount.updateOne(filterAccount, updateValue);
+
+      if (!updateRes) {
+        res.status(400).send({
+          message: "Account not found",
+        });
+        return;
+      }
+    });
+
     const delResult = await collection.deleteOne(filterTransaction);
+    if (!delResult) {
+      res.status(400).send({
+        message: "Transaction not found",
+      });
+      return;
+    }
     res.status(200).send({
       message: "Transaction deleted successfully",
     });

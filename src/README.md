@@ -142,7 +142,13 @@
 
 ## Accounts
 
-### GET: /api/v1/accounts
+### GET: /api/v1/accounts?{query}
+
+#### Query (optional)
+
+```
+limit={start}&skip={end}&until={until}
+```
 
 #### Required:
 
@@ -161,7 +167,8 @@
       "name": "{accountName}",
       "number": "{accountNumber}",
       "description": "{accountDescription}",
-      "amount": "{amount}"
+      "amount": "{amount}",
+      "priority": "{priority}"
     },
     {
       /* ... */
@@ -187,6 +194,7 @@
 - number
 - description
 - amount
+- priority (optional, default: 0)
 
 #### Response:
 
@@ -199,11 +207,12 @@
 }
 ```
 
-### PATCH: /api/v1/accounts
+### PATCH: /api/v1/accounts/:id
 
 #### Required:
 
 - JWT (as bearer token)
+- accountId (as request param)
 
 #### Optional (as JSON payload):
 
@@ -212,6 +221,7 @@
 - number
 - description
 - amount
+- priority
 
 #### Response:
 
@@ -231,11 +241,12 @@
 }
 ```
 
-### DELETE: /api/v1/accounts
+### DELETE: /api/v1/accounts/:id
 
 #### Required:
 
 - JWT (as bearer token)
+- accountId (as request param)
 
 #### Response:
 
@@ -256,9 +267,14 @@
 ```
 
 ## Transactions
+
 ### GET: /api/v1/transactions?{query}
 
-- query: 'limit={start}&skip={end}&until={until}' (optional)
+#### Query (optional)
+
+```
+limit={start}&skip={end}&until={until}
+```
 
 #### Required:
 
@@ -272,23 +288,27 @@
 {
   "message": "Account",
   "data": [
+    {
+      "userId": "{userId}",
+      "accountId": "{accountId}",
+      "type": "{type}",
+      "amount": "{amount}",
+      "category": 
       {
-        "userId": "{userId}",
-        "accountId": "{accountId}",
-        "type": "{type}",
-        "amount": "{amount}",
-        "category": "{category}",
-        "description": "{description}",
-        "createdAt": "{createdAt}"
+        "name": "{name}",
+        "image": "{image}"
       },
-      {
-        /* ... */
-      } 
+      "description": "{description}",
+      "createdAt": "{createdAt}"
+    },
+    {
+      /* ... */
+    }
   ]
 }
 ```
 
-### GET: /api/v1/transactions/:interval?{query} 
+### GET: /api/v1/transactions/:interval?{query}
 
 - interval: 'daily', 'weekly', 'monthly', 'yearly'
 - query: 'limit={start}&skip={end}&until={until}' (optional)
@@ -313,7 +333,11 @@
           "accountId": "{accountId}",
           "type": "{type}",
           "amount": "{amount}",
-          "category": "{category}",
+          "category": 
+          {
+            "name": "{name}",
+            "image": "{image}"
+          },
           "description": "{description}",
           "createdAt": "{createdAt}"
         },
@@ -361,11 +385,12 @@
 }
 ```
 
-### PATCH: /api/v1/transactions
+### PATCH: /api/v1/transactions/:id
 
 #### Required:
 
 - JWT (as bearer token)
+- transactionId (as request param)
 
 #### Optional (as JSON payload):
 
@@ -395,11 +420,12 @@
 }
 ```
 
-### DELETE: /api/v1/transactions
+### DELETE: /api/v1/transactions/:id
 
 #### Required:
 
 - JWT (as bearer token)
+- transactionId (as request param)
 
 #### Response:
 
@@ -423,7 +449,11 @@
 
 ### GET: /api/v1/debts?{query}
 
-- query: 'limit={start}&skip={end}&until={until}' (optional)
+#### Query (optional)
+
+```
+limit={start}&skip={end}&until={until}
+```
 
 #### Required:
 
@@ -486,11 +516,12 @@
 }
 ```
 
-### PATCH: /api/v1/debts
+### PATCH: /api/v1/debts/:id
 
 #### Required:
 
 - JWT (as bearer token)
+- debtId (as request param)
 
 #### Optional (as JSON payload):
 
@@ -521,11 +552,12 @@
 }
 ```
 
-### DELETE: /api/v1/debts
+### DELETE: /api/v1/debts/:id
 
 #### Required:
 
 - JWT (as bearer token)
+- debtId (as request param)
 
 #### Response:
 
@@ -544,3 +576,32 @@
   "message": "{Error message}"
 }
 ```
+
+## Dashboard
+
+### GET: /api/v1/dashboard
+
+#### Required:
+
+- JWT (as bearer token)
+
+#### Response:
+
+- 200 OK with JSON Payload:
+
+```json
+{
+  "message": "Fetch dashboard data successfully",
+  "data": []
+}
+```
+
+- 4xx with JSON Payload:
+
+```json
+{
+  "message": "{Error message}"
+}
+```
+
+### PATCH: /api/v1/dashboard
