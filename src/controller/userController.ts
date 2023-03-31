@@ -27,18 +27,21 @@ const register = async (req: Request, res: Response) => {
   if (!username || !email || !password) {
     res.status(400).send({
       message: "Please provide a username, email and password",
+      userMessage: "Username, email, atau password kosong"
     });
     return;
   }
   if (await emailExisted(email)) {
     res.status(400).send({
       message: "Email already exists",
+      userMessage: "Email sudah dipakai"
     });
     return;
   }
   if (await usernameExisted(username)) {
     res.status(400).send({
       message: "Username already exists",
+      userMessage: "Username sudah dipakai",
     });
     return;
   }
@@ -54,13 +57,14 @@ const register = async (req: Request, res: Response) => {
       email: email,
       password: hashedPass,
       salt: salt,
-      theme: "bochi_the_default",
+      theme: "bocchi",
     });
     res.status(HttpStatusCode.CREATED).send();
   } catch (err) {
     console.log(err);
     res.status(500).send({
       message: "Internal server error",
+      userMessage: "Terjadi kesalahan pada server"
     });
   }
 };
