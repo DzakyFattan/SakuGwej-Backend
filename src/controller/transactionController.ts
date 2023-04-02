@@ -182,8 +182,8 @@ const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
     const accountId = new ObjectId(req.body.accountId);
     const checkAccount = (await db).db("sakugwej").collection("accounts");
     let query2 = {
+      _id: accountId,
       userId: _userId,
-      accountId: accountId,
     };
     let acc = await checkAccount.findOne(query2);
     if (!acc) {
@@ -195,22 +195,112 @@ const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
     const _transactionId = new ObjectId(req.params.id);
     const collection = (await db).db("sakugwej").collection("transactions");
     let filter = { userId: _userId, _id: _transactionId };
-    const updateDocument = {
-      $set: {
-        type: req.body.type,
-        amount: parseFloat(req.body.amount),
-        category: req.body.category,
-        accountId: accountId,
-        description: req.body.description,
-        createdAt: new Date(req.body.createdAt),
-      },
-    };
-    const updResult = await collection.updateOne(filter, updateDocument);
-    if (!updResult) {
+    const transaction = await collection.findOne(filter);
+    if (!transaction) {
       res.status(400).send({
         message: "Transaction not found",
       });
       return;
+    }
+
+    const updated = () => {
+      let update: Record<any, any> = {};
+      if (req.body.type && transaction.type !== req.body.type) {
+        update.type = req.body.type;
+      }
+      if (req.body.amount) {
+        update.amount = parseFloat(req.body.amount);
+      }
+      if (req.body.category && transaction.category !== req.body.category) {
+        update.category = req.body.category;
+      }
+      if (req.body.accountId && transaction.accountId !== req.body.accountId) {
+        update.accountId = req.body.accountId;
+      }
+      if (req.body.description && transaction.description !== req.body.description) {
+        update.description = req.body.description;
+      }
+      if (req.body.createdAt && transaction.createdAt !== req.body.createdAt) {
+        update.createdAt = new Date(req.body.createdAt);
+      }
+      return update;
+    };
+    console.log(updated());
+    const updateDocument = {
+      $set: updated(),
+    };
+    const updResult = await collection.updateOne(filter, updateDocument);
+    if (updResult.matchedCount === 0) {
+      res.status(400).send({
+        message: "Transaction not found",
+      });
+      return;
+    }
+
+    if (updResult.modifiedCount === 0) {
+      res.status(400).send({
+        message: "Transaction not updated",
+      });
+      return;
+    }
+    const updateAccount = (await db).db("sakugwej").collection("accounts");
+    let updateFilter = { _id: accountId, userId: _userId };
+    const account = await updateAccount.findOne(updateFilter);
+    if (!account) {
+      res.status(400).send({
+        message: "Account not found",
+      });
+      return;
+    }
+
+    let updateAmount = parseFloat(req.body.amount);
+    if (transaction.accountId == accountId) {   
+      if (transaction.type !== req.body.type) {
+        updateAmount = transaction.type === "credit" ? - transaction.amount - updateAmount : transaction.amount + updateAmount;
+      } else {
+        updateAmount = transaction.type === "credit" ? - transaction.amount + updateAmount : transaction.amount - updateAmount;
+      }
+      let updateValue = {
+        $inc: { amount: updateAmount },
+      };
+      let updateRes = await updateAccount.updateOne(updateFilter, updateValue);
+      if (!updateRes) {
+        res.status(400).send({
+          message: "Account not found",
+        });
+        return;
+      }
+    } else {
+      if (req.body.amount) {
+        updateAmount = transaction.type === "credit" ? updateAmount : -updateAmount;
+      } else {
+        updateAmount = transaction.type === "credit" ? -transaction.amount : transaction.amount;
+      }
+      // update new account
+      let updateValue = {
+        $inc: { amount: updateAmount },
+      };
+      let updateRes = await updateAccount.updateOne(updateFilter, updateValue);
+      if (!updateRes) {
+        res.status(400).send({
+          message: "Account not found",
+        });
+        return;
+      }
+      // update old account
+      const oldAccountId = new ObjectId(transaction.accountId);
+      updateAmount = transaction.type === "credit" ? -transaction.amount : transaction.amount;
+      updateFilter = { _id: oldAccountId, userId: _userId };
+      updateValue = {
+        $inc: { amount: updateAmount },
+      };
+      updateRes = await updateAccount.updateOne(updateFilter, updateValue);
+      if (!updateRes) {
+        res.status(400).send({
+          message: "Account not found",
+        });
+        return;
+      }
     }
     res.status(200).send({
       message: "Transaction updated successfully",

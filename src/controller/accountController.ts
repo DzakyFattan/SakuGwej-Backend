@@ -124,9 +124,9 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
     const updated = () => {
       let update: Record<any, any> = {};
       if (req.body.name && req.body.name != "") update["name"] = req.body.name;
-      if (req.body.number && req.body.number != "") update["number"] = req.body.number;
+      if (req.body.number) update["number"] = req.body.number;
       if (req.body.amount) update["amount"] = parseFloat(req.body.amount);
-      if (req.body.description && req.body.description != "") update["description"] = req.body.description;
+      if (req.body.description) update["description"] = req.body.description;
       if (req.body.image && req.body.image != "") update["image"] = req.body.image;
       if (req.body.priority) update["priority"] = parseInt(req.body.priority);
       return update;

@@ -367,10 +367,10 @@ limit={start}&skip={end}&until={until}
 #### Required (as JSON payload):
 
 - userId (from JWT as bearer token)
-- accountId
 - type
 - amount
 - category
+- accountId
 - description
 - createdAt
 
@@ -394,10 +394,10 @@ limit={start}&skip={end}&until={until}
 
 #### Optional (as JSON payload):
 
-- accountId
 - type
 - amount
 - category
+- accountId
 - description
 - createdAt
 
