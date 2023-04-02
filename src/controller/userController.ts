@@ -114,7 +114,7 @@ const login = async (req: Request, res: Response) => {
     res.send({
       message: "Login successful",
       token: token,
-      theme: result.theme ? result.theme : "bochi_the_default",
+      theme: result.theme ? result.theme : "bocchi",
     });
   } catch (err) {
     console.log(err);

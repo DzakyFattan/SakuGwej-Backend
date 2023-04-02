@@ -164,10 +164,11 @@ limit={start}&skip={end}&until={until}
   "data": [
     {
       "userId": "{userId}",
-      "name": "{accountName}",
-      "number": "{accountNumber}",
-      "description": "{accountDescription}",
+      "name": "{name}",
+      "number": "{number}",
       "amount": "{amount}",
+      "description": "{description}",
+      "image": "{image}",
       "priority": "{priority}"
     },
     {
@@ -189,12 +190,13 @@ limit={start}&skip={end}&until={until}
 
 #### Required (as JSON payload):
 
-- userId
+- userId (from JWT as bearer token)
 - name
 - number
-- description
 - amount
-- priority (optional, default: 0)
+- description
+- image
+- priority (optional, default: -1)
 
 #### Response:
 
@@ -211,16 +213,16 @@ limit={start}&skip={end}&until={until}
 
 #### Required:
 
-- JWT (as bearer token)
+- userId (from JWT as bearer token)
 - accountId (as request param)
 
 #### Optional (as JSON payload):
 
-- userId
 - name
 - number
-- description
 - amount
+- description
+- image
 - priority
 
 #### Response:
@@ -245,7 +247,7 @@ limit={start}&skip={end}&until={until}
 
 #### Required:
 
-- JWT (as bearer token)
+- userId (from JWT as bearer token)
 - accountId (as request param)
 
 #### Response:
@@ -278,7 +280,7 @@ limit={start}&skip={end}&until={until}
 
 #### Required:
 
-- JWT (as bearer token)
+- userId (from JWT as bearer token)
 
 #### Response:
 
@@ -293,8 +295,7 @@ limit={start}&skip={end}&until={until}
       "accountId": "{accountId}",
       "type": "{type}",
       "amount": "{amount}",
-      "category": 
-      {
+      "category": {
         "name": "{name}",
         "image": "{image}"
       },
@@ -315,7 +316,7 @@ limit={start}&skip={end}&until={until}
 
 #### Required:
 
-- JWT (as bearer token)
+- userId (from JWT as bearer token)
 
 #### Response:
 
@@ -333,8 +334,7 @@ limit={start}&skip={end}&until={until}
           "accountId": "{accountId}",
           "type": "{type}",
           "amount": "{amount}",
-          "category": 
-          {
+          "category": {
             "name": "{name}",
             "image": "{image}"
           },
@@ -366,7 +366,7 @@ limit={start}&skip={end}&until={until}
 
 #### Required (as JSON payload):
 
-- userId
+- userId (from JWT as bearer token)
 - accountId
 - type
 - amount
@@ -389,12 +389,11 @@ limit={start}&skip={end}&until={until}
 
 #### Required:
 
-- JWT (as bearer token)
+- userId (from JWT as bearer token)
 - transactionId (as request param)
 
 #### Optional (as JSON payload):
 
-- userId
 - accountId
 - type
 - amount
@@ -424,7 +423,7 @@ limit={start}&skip={end}&until={until}
 
 #### Required:
 
-- JWT (as bearer token)
+- userId (from JWT as bearer token)
 - transactionId (as request param)
 
 #### Response:
@@ -457,7 +456,7 @@ limit={start}&skip={end}&until={until}
 
 #### Required:
 
-- JWT (as bearer token)
+- userId (from JWT as bearer token)
 
 #### Response:
 
@@ -496,7 +495,7 @@ limit={start}&skip={end}&until={until}
 
 #### Required (as JSON payload):
 
-- userId
+- userId (from JWT as bearer token)
 - ~~accountId~~
 - type
 - amount
@@ -520,12 +519,11 @@ limit={start}&skip={end}&until={until}
 
 #### Required:
 
-- JWT (as bearer token)
+- userId (from JWT as bearer token)
 - debtId (as request param)
 
 #### Optional (as JSON payload):
 
-- userId
 - ~~accountId~~
 - type
 - amount
@@ -556,7 +554,7 @@ limit={start}&skip={end}&until={until}
 
 #### Required:
 
-- JWT (as bearer token)
+- userId (from JWT as bearer token)
 - debtId (as request param)
 
 #### Response:
@@ -583,7 +581,7 @@ limit={start}&skip={end}&until={until}
 
 #### Required:
 
-- JWT (as bearer token)
+- userId (from JWT as bearer token)
 
 #### Response:
 
