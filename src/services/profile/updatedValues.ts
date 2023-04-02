@@ -3,7 +3,7 @@ import { AuthenticatedRequest } from "../../types/AuthenticatedRequest";
 import crypto from "crypto-js";
 import db from "../../utils/db";
 
-var themes = ["bochi_the_default", "bochi_the_dark", "bochi_the_light"];
+var themes = ["bocchi", "ryo", "nijika", "kita"];
 
 async function getUpdatedvalues(req: AuthenticatedRequest, res: Response) {
   const {
