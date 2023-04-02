@@ -27,14 +27,14 @@ const register = async (req: Request, res: Response) => {
   if (!username || !email || !password) {
     res.status(400).send({
       message: "Please provide a username, email and password",
-      userMessage: "Username, email, atau password kosong"
+      userMessage: "Username, email, atau password kosong",
     });
     return;
   }
   if (await emailExisted(email)) {
     res.status(400).send({
       message: "Email already exists",
-      userMessage: "Email sudah dipakai"
+      userMessage: "Email sudah dipakai",
     });
     return;
   }
@@ -64,7 +64,7 @@ const register = async (req: Request, res: Response) => {
     console.log(err);
     res.status(500).send({
       message: "Internal server error",
-      userMessage: "Terjadi kesalahan pada server"
+      userMessage: "Terjadi kesalahan pada server",
     });
   }
 };

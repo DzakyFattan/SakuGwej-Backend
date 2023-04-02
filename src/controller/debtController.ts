@@ -2,7 +2,7 @@ import { Response } from "express";
 import { AuthenticatedRequest } from "../types/AuthenticatedRequest";
 import { HttpStatusCode } from "../types/HttpStatusCode";
 import db from "../utils/db";
-import { ObjectId, SortDirection  } from "mongodb";
+import { ObjectId, SortDirection } from "mongodb";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -97,7 +97,7 @@ const addDebt = async (req: AuthenticatedRequest, res: Response) => {
       name: req.body.name,
       description: req.body.description,
       startDate: new Date(req.body.startDate),
-      dueDate: new Date(req.body.dueDate)
+      dueDate: new Date(req.body.dueDate),
     };
     const addResult = await collection.insertOne(addDebt);
     res.status(HttpStatusCode.CREATED).send({
@@ -107,7 +107,7 @@ const addDebt = async (req: AuthenticatedRequest, res: Response) => {
     console.log(err);
     res.status(500).send({
       message: "Internal server error",
-      err: (new Date(req.body.dueDate))
+      err: new Date(req.body.dueDate),
     });
   }
 };
@@ -133,17 +133,40 @@ const updateDebt = async (req: AuthenticatedRequest, res: Response) => {
     const _debtId = new ObjectId(req.params.id);
     const collection = (await db).db("sakugwej").collection("debts");
     let filter = { userId: _userId, _id: _debtId };
+    const updated = () => {
+      let update: Record<any, any> = {};
+      if (req.body.type && req.body.type !== "") {
+        update.type = req.body.type;
+      }
+      if (req.body.amount) {
+        update.amount = parseFloat(req.body.amount);
+      }
+      if (req.body.name) {
+        update.name = req.body.name;
+      }
+      if (req.body.description) {
+        update.description = req.body.description;
+      }
+      if (req.body.startDate) {
+        update.startDate = new Date(req.body.startDate);
+      }
+      if (req.body.dueDate) {
+        update.dueDate = new Date(req.body.dueDate);
+      }
+      return update;
+    };
+
     const updateDocument = {
-      $set: {
-        type: req.body.type,
-        amount: parseFloat(req.body.amount),
-        name: req.body.name,
-        description: req.body.description,
-        startDate: req.body.startDate,
-        dueDate: req.body.dueDate,
-      },
+      $set: updated(),
     };
     const updResult = await collection.updateOne(filter, updateDocument);
+    if (updResult.modifiedCount === 0) {
+      res.status(400).send({
+        message: "Debt not updated",
+      });
+      return;
+    }
+
     res.status(200).send({
       message: "Debt updated successfully",
     });

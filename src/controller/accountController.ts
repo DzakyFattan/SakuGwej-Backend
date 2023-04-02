@@ -127,7 +127,8 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
       if (req.body.number) update["number"] = req.body.number;
       if (req.body.amount) update["amount"] = parseFloat(req.body.amount);
       if (req.body.description) update["description"] = req.body.description;
-      if (req.body.image && req.body.image != "") update["image"] = req.body.image;
+      if (req.body.image && req.body.image != "")
+        update["image"] = req.body.image;
       if (req.body.priority) update["priority"] = parseInt(req.body.priority);
       return update;
     };
@@ -135,13 +136,6 @@ const updateAccount = async (req: AuthenticatedRequest, res: Response) => {
       $set: updated(),
     };
     const updResult = await collection.updateOne(filter, updateDocument);
-    if (updResult.matchedCount === 0) {
-      res.status(400).send({
-        message: "Account not found",
-      });
-      return;
-    }
-
     if (updResult.modifiedCount === 0) {
       res.status(400).send({
         message: "Account not updated",

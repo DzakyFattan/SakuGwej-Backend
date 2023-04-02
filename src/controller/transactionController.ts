@@ -22,15 +22,17 @@ const getTransactions = async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
 
-    const utc = new Date().toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      timeZone: "Asia/Jakarta",
-    }).split("/");
+    const utc = new Date()
+      .toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        timeZone: "Asia/Jakarta",
+      })
+      .split("/");
     const now = `${utc[2]}-${utc[0]}-${utc[1]}`;
     const def = new Date(now).getTime() - 30 * 24 * 60 * 60 * 1000;
-    const until = req.query.until ? req.query.until as string : def
+    const until = req.query.until ? (req.query.until as string) : def;
 
     const collection = (await db).db("sakugwej").collection("transactions");
     const filterTransaction = {
@@ -129,7 +131,10 @@ const addTransaction = async (req: AuthenticatedRequest, res: Response) => {
     let updateFilter = { _id: accountId, userId: _userId };
     let updateValue = {
       $inc: {
-        amount: req.body.type === "credit" ? parseFloat(req.body.amount) : -parseFloat(req.body.amount),
+        amount:
+          req.body.type === "credit"
+            ? parseFloat(req.body.amount)
+            : -parseFloat(req.body.amount),
       },
     };
     let updateRes = await updateAccount.updateOne(updateFilter, updateValue);
@@ -139,7 +144,7 @@ const addTransaction = async (req: AuthenticatedRequest, res: Response) => {
       });
       return;
     }
-        const collection = (await db).db("sakugwej").collection("transactions");
+    const collection = (await db).db("sakugwej").collection("transactions");
     const addDocument = {
       userId: _userId,
       type: req.body.type,
@@ -217,7 +222,10 @@ const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
       if (req.body.accountId && transaction.accountId !== req.body.accountId) {
         update.accountId = req.body.accountId;
       }
-      if (req.body.description && transaction.description !== req.body.description) {
+      if (
+        req.body.description &&
+        transaction.description !== req.body.description
+      ) {
         update.description = req.body.description;
       }
       if (req.body.createdAt && transaction.createdAt !== req.body.createdAt) {
@@ -230,13 +238,6 @@ const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
       $set: updated(),
     };
     const updResult = await collection.updateOne(filter, updateDocument);
-    if (updResult.matchedCount === 0) {
-      res.status(400).send({
-        message: "Transaction not found",
-      });
-      return;
-    }
-
     if (updResult.modifiedCount === 0) {
       res.status(400).send({
         message: "Transaction not updated",
@@ -254,11 +255,17 @@ const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     let updateAmount = parseFloat(req.body.amount);
-    if (transaction.accountId == accountId) {   
+    if (transaction.accountId == accountId) {
       if (transaction.type !== req.body.type) {
-        updateAmount = transaction.type === "credit" ? - transaction.amount - updateAmount : transaction.amount + updateAmount;
+        updateAmount =
+          transaction.type === "credit"
+            ? -transaction.amount - updateAmount
+            : transaction.amount + updateAmount;
       } else {
-        updateAmount = transaction.type === "credit" ? - transaction.amount + updateAmount : transaction.amount - updateAmount;
+        updateAmount =
+          transaction.type === "credit"
+            ? -transaction.amount + updateAmount
+            : transaction.amount - updateAmount;
       }
       let updateValue = {
         $inc: { amount: updateAmount },
@@ -272,9 +279,13 @@ const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
       }
     } else {
       if (req.body.amount) {
-        updateAmount = transaction.type === "credit" ? updateAmount : -updateAmount;
+        updateAmount =
+          transaction.type === "credit" ? updateAmount : -updateAmount;
       } else {
-        updateAmount = transaction.type === "credit" ? -transaction.amount : transaction.amount;
+        updateAmount =
+          transaction.type === "credit"
+            ? -transaction.amount
+            : transaction.amount;
       }
       // update new account
       let updateValue = {
@@ -289,7 +300,10 @@ const updateTransaction = async (req: AuthenticatedRequest, res: Response) => {
       }
       // update old account
       const oldAccountId = new ObjectId(transaction.accountId);
-      updateAmount = transaction.type === "credit" ? -transaction.amount : transaction.amount;
+      updateAmount =
+        transaction.type === "credit"
+          ? -transaction.amount
+          : transaction.amount;
       updateFilter = { _id: oldAccountId, userId: _userId };
       updateValue = {
         $inc: { amount: updateAmount },
@@ -329,8 +343,8 @@ const deleteTransaction = async (req: AuthenticatedRequest, res: Response) => {
     const collection = (await db).db("sakugwej").collection("transactions");
     const _transactionId = new ObjectId(req.params.id);
     let filterTransaction = _transactionId
-    ? { userId: _userId, _id: _transactionId }
-    : { userId: _userId };
+      ? { userId: _userId, _id: _transactionId }
+      : { userId: _userId };
     const transactions = await collection.find(filterTransaction).toArray();
     if (!transactions) {
       res.status(400).send({
@@ -344,11 +358,18 @@ const deleteTransaction = async (req: AuthenticatedRequest, res: Response) => {
 
       const filterAccount = { _id: accountId, userId: _userId };
       const updateValue = {
-        $inc: {amount: transaction.type === "credit"? -parseFloat(transaction.amount) : parseFloat(transaction.amount),
+        $inc: {
+          amount:
+            transaction.type === "credit"
+              ? -parseFloat(transaction.amount)
+              : parseFloat(transaction.amount),
         },
       };
 
-      const updateRes = await updateAccount.updateOne(filterAccount, updateValue);
+      const updateRes = await updateAccount.updateOne(
+        filterAccount,
+        updateValue
+      );
 
       if (!updateRes) {
         res.status(400).send({
